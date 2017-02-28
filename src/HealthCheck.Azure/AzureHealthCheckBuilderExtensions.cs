@@ -1,8 +1,8 @@
-﻿using Microsoft.WindowsAzure.Storage;
+﻿using System;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
-using System;
 
-namespace HealthChecks
+namespace Microsoft.Extensions.HealthChecks
 {
     public static class AzureHealthCheckBuilderExtensions
     {

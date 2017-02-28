@@ -1,4 +1,4 @@
-﻿namespace HealthChecks
+﻿namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckResult
     {

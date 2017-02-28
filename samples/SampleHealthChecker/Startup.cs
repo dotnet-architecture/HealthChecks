@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.HealthChecks;
 using Microsoft.Extensions.Logging;
-using HealthChecks;
 
 namespace SampleHealthChecker
 {
@@ -28,7 +25,8 @@ namespace SampleHealthChecker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHealthChecks(checks => {
+            services.AddHealthChecks(checks =>
+            {
                 checks.AddUrlCheck("https://github.com");
                 checks.AddPrivateMemorySizeCheck(1);
                 checks.AddVirtualMemorySizeCheck(2);

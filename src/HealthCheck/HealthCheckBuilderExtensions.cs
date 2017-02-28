@@ -1,14 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Data.SqlClient;
-using System.Data;
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.Text;
-using System.Linq;
 
-namespace HealthChecks
+namespace Microsoft.Extensions.HealthChecks
 {
     public static class HealthCheckBuilderExtensions
     {
@@ -16,7 +16,8 @@ namespace HealthChecks
         public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string group)
         {
             var urls = urlItems.ToList();
-            builder.AddCheck($"UrlChecks ({group})", async () => {
+            builder.AddCheck($"UrlChecks ({group})", async () =>
+            {
 
                 var successfulChecks = 0;
                 var description = new StringBuilder();
@@ -62,7 +63,8 @@ namespace HealthChecks
 
         public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url)
         {
-            builder.AddCheck($"UrlCheck ({url})", async () => {
+            builder.AddCheck($"UrlCheck ({url})", async () =>
+            {
                 var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
                 var response = await httpClient.GetAsync(url);
@@ -139,7 +141,8 @@ namespace HealthChecks
         //TODO: It is probably better if this is more generic, not SQL specific.
         public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string connectionString)
         {
-            builder.AddCheck($"SQL Check:", async () => {
+            builder.AddCheck($"SQL Check:", async () =>
+            {
                 try
                 {
                     //TODO: There is probably a much better way to do this.

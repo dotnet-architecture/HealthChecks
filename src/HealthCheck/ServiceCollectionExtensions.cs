@@ -1,8 +1,5 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using HealthChecks;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.HealthChecks;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
             checkupAction.Invoke(checkupBuilder);
 
             services.AddSingleton(checkupBuilder);
-            services.AddSingleton<IHealthCheckService, HealthCheckService>();            
+            services.AddSingleton<IHealthCheckService, HealthCheckService>();
             return services;
         }
     }

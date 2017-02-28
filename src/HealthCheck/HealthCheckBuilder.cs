@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HealthChecks
+namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckBuilder
     {

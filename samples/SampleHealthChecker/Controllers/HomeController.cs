@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using HealthChecks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.HealthChecks;
 using Newtonsoft.Json;
 
 namespace SampleHealthChecker.Controllers
@@ -30,7 +26,7 @@ namespace SampleHealthChecker.Controllers
                 result = "unhealthy!";
             }
 
-            ViewData["Results"] = JsonConvert.SerializeObject(_healthCheck.CheckResults); 
+            ViewData["Results"] = JsonConvert.SerializeObject(_healthCheck.CheckResults);
             ViewData["AppStatus"] = result;
 
             return View();

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HealthChecks
+namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckResults
     {

@@ -1,7 +1,5 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using HealthChecks;
+using Microsoft.Extensions.HealthChecks;
 
 namespace Microsoft.AspNetCore.Hosting
 {
@@ -21,7 +19,7 @@ namespace Microsoft.AspNetCore.Hosting
             var loops = 0;
             do
             {
-                if(healthChecks.CheckHealthAsync().Result)
+                if (healthChecks.CheckHealthAsync().Result)
                 {
                     webHost.Run();
                     break;
@@ -30,7 +28,7 @@ namespace Microsoft.AspNetCore.Hosting
                 System.Threading.Thread.Sleep(1000);
                 loops++;
 
-            } while(loops < timeout.TotalSeconds);
+            } while (loops < timeout.TotalSeconds);
         }
     }
 }
