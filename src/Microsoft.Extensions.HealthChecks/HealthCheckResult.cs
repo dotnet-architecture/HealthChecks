@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.Extensions.HealthChecks
 {
-    public class HealthCheckResult
+    public class HealthCheckResult : IHealthCheckResult
     {
         public CheckStatus CheckStatus { get; }
         public string Description { get; }

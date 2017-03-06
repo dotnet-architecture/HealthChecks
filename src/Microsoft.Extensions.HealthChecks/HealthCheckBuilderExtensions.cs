@@ -125,7 +125,7 @@ namespace Microsoft.Extensions.HealthChecks
             return builder;
         }
 
-        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url, Func<HttpResponseMessage, HealthCheckResult> checkFunc)
+        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url, Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
         {
             builder.AddCheck($"UrlCheck ({url})", async () =>
             {

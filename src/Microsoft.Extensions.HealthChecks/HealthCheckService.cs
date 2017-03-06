@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckService : IHealthCheckService
     {
-        public Dictionary<string, Func<ValueTask<HealthCheckResult>>> _checks;
+        public Dictionary<string, Func<ValueTask<IHealthCheckResult>>> _checks;
 
         private ILogger<HealthCheckService> _logger;
 
