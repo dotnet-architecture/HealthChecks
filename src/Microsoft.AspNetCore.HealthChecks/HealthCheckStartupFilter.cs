@@ -1,9 +1,8 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 
-namespace Microsoft.Extensions.HealthChecks
+namespace Microsoft.AspNetCore.HealthChecks
 {
     public class HealthCheckStartupFilter : IStartupFilter
     {
@@ -15,7 +14,8 @@ namespace Microsoft.Extensions.HealthChecks
 
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
         {
-            return app => {
+            return app =>
+            {
                 app.UseMiddleware<HealthCheckMiddleware>(_port);
                 next(app);
             };
