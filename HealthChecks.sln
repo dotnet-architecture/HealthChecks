@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E05DCF88-F916-4B61-A5DC-A8344C9E2429}"
 EndProject
@@ -9,11 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F9BA869A-7D5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EEADFA4C-4152-405D-BE04-9C62D4A5CFAC}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.HealthChecks", "src\Microsoft.Extensions.HealthChecks\Microsoft.Extensions.HealthChecks.xproj", "{26A77B9A-5599-4BBA-8C5C-90DF1A4F4558}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks", "src\Microsoft.Extensions.HealthChecks\Microsoft.Extensions.HealthChecks.csproj", "{26A77B9A-5599-4BBA-8C5C-90DF1A4F4558}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.HealthChecks.Azure", "src\Microsoft.Extensions.HealthChecks.Azure\Microsoft.Extensions.HealthChecks.Azure.xproj", "{0C4158B7-7153-4D2E-ABFA-4CE07D44F75F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Azure", "src\Microsoft.Extensions.HealthChecks.Azure\Microsoft.Extensions.HealthChecks.Azure.csproj", "{0C4158B7-7153-4D2E-ABFA-4CE07D44F75F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleHealthChecker", "samples\SampleHealthChecker\SampleHealthChecker.xproj", "{2074E1EA-8744-4FCB-B2A8-436623F6DF7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleHealthChecker", "samples\SampleHealthChecker\SampleHealthChecker.csproj", "{2074E1EA-8744-4FCB-B2A8-436623F6DF7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
