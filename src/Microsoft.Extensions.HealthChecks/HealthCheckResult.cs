@@ -30,5 +30,10 @@
         {
             return new HealthCheckResult(CheckStatus.Unknown, description);
         }
+
+        public static HealthCheckResult FromStatus(CheckStatus status, string description)
+        {
+            return new HealthCheckResult(status, description);
+        }
     }
 }

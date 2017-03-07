@@ -24,5 +24,13 @@ namespace Microsoft.Extensions.HealthChecks
             Checks.Add(name, () => new ValueTask<IHealthCheckResult>(check()));
             return this;
         }
+
+        // REVIEW: This is clearly not the right API, but it'll suffice for now for the purposes of testing
+        public Func<ValueTask<IHealthCheckResult>> GetCheck(string name)
+        {
+            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
+
+            return Checks.TryGetValue(name, out Func<ValueTask<IHealthCheckResult>> result) ? result : null;
+        }
     }
 }
