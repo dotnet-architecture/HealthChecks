@@ -12,6 +12,51 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public static class HealthCheckBuilderExtensions
     {
+        public static HealthCheckBuilder AddPrivateMemorySizeCheck(this HealthCheckBuilder builder, long maxSize)
+        {
+            builder.AddCheck($"PrivateMemorySize64 ({maxSize})", () =>
+            {
+                if (Process.GetCurrentProcess().PrivateMemorySize64 <= maxSize)
+                {
+                    return HealthCheckResult.Healthy($"AddPrivateMemorySizeCheck, maxSize: {maxSize}");
+                }
+
+                return HealthCheckResult.Unhealthy($"AddPrivateMemorySizeCheck, maxSize: {maxSize}");
+            });
+
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url)
+        {
+            builder.AddCheck($"UrlCheck ({url})", async () =>
+            {
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
+                var response = await httpClient.GetAsync(url);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return HealthCheckResult.Healthy($"UrlCheck: {url}");
+                };
+
+                return HealthCheckResult.Unhealthy($"UrlCheck: {url}");
+
+            });
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url, Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
+        {
+            builder.AddCheck($"UrlCheck ({url})", async () =>
+            {
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
+                var response = await httpClient.GetAsync(url);
+                return checkFunc(response);
+            });
+            return builder;
+        }
 
         public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string group)
         {
@@ -61,25 +106,6 @@ namespace Microsoft.Extensions.HealthChecks
             return builder;
         }
 
-        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url)
-        {
-            builder.AddCheck($"UrlCheck ({url})", async () =>
-            {
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
-                var response = await httpClient.GetAsync(url);
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return HealthCheckResult.Healthy($"UrlCheck: {url}");
-                };
-
-                return HealthCheckResult.Unhealthy($"UrlCheck: {url}");
-
-            });
-            return builder;
-        }
-
         public static HealthCheckBuilder AddVirtualMemorySizeCheck(this HealthCheckBuilder builder, long maxSize)
         {
             builder.AddCheck($"VirtualMemorySize ({maxSize})", () =>
@@ -107,33 +133,6 @@ namespace Microsoft.Extensions.HealthChecks
                 return HealthCheckResult.Unhealthy($"AddWorkingSetCheck, maxSize: {maxSize}");
             });
 
-            return builder;
-        }
-
-        public static HealthCheckBuilder AddPrivateMemorySizeCheck(this HealthCheckBuilder builder, long maxSize)
-        {
-            builder.AddCheck($"PrivateMemorySize64 ({maxSize})", () =>
-            {
-                if (Process.GetCurrentProcess().PrivateMemorySize64 <= maxSize)
-                {
-                    return HealthCheckResult.Healthy($"AddPrivateMemorySizeCheck, maxSize: {maxSize}");
-                }
-
-                return HealthCheckResult.Unhealthy($"AddPrivateMemorySizeCheck, maxSize: {maxSize}");
-            });
-
-            return builder;
-        }
-
-        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url, Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
-        {
-            builder.AddCheck($"UrlCheck ({url})", async () =>
-            {
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
-                var response = await httpClient.GetAsync(url);
-                return checkFunc(response);
-            });
             return builder;
         }
 
