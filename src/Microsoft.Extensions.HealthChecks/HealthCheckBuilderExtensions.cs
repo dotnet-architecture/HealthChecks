@@ -6,7 +6,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.HealthChecks.Internal;
 
 namespace Microsoft.Extensions.HealthChecks
 {
@@ -50,81 +51,94 @@ namespace Microsoft.Extensions.HealthChecks
             => AddMaxValueCheck(builder, $"PrivateMemorySize({maxSize})", maxSize, () => Process.GetCurrentProcess().PrivateMemorySize64);
 
         public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url)
+            => AddUrlCheck(builder, url, response => DefaultUrlCheck(response));
+
+        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url,
+                                                     Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
         {
-            builder.AddCheck($"UrlCheck ({url})", async () =>
-            {
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
-                var response = await httpClient.GetAsync(url);
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
 
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return HealthCheckResult.Healthy($"UrlCheck: {url}");
-                };
+            return AddUrlCheck(builder, url, response => new ValueTask<IHealthCheckResult>(checkFunc(response)));
+        }
 
-                return HealthCheckResult.Unhealthy($"UrlCheck: {url}");
+        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url,
+                                                     Func<HttpResponseMessage, Task<IHealthCheckResult>> checkFunc)
+        {
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
 
-            });
+            return AddUrlCheck(builder, url, response => new ValueTask<IHealthCheckResult>(checkFunc(response)));
+        }
+
+        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url,
+                                                     Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+            Guard.ArgumentNotNullOrWhitespace(nameof(url), url);
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
+
+            var urlCheck = new UrlChecker(checkFunc, url);
+            builder.AddCheck($"UrlCheck({url})", () => urlCheck.CheckAsync());
             return builder;
         }
 
-        public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url, Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName)
+            => AddUrlChecks(builder, urlItems, groupName, CheckStatus.Warning, response => DefaultUrlCheck(response));
+
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
         {
-            builder.AddCheck($"UrlCheck ({url})", async () =>
-            {
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
-                var response = await httpClient.GetAsync(url);
-                return checkFunc(response);
-            });
-            return builder;
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
+
+            return AddUrlChecks(builder, urlItems, groupName, CheckStatus.Warning, response => new ValueTask<IHealthCheckResult>(checkFunc(response)));
         }
 
-        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string group)
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      Func<HttpResponseMessage, Task<IHealthCheckResult>> checkFunc)
         {
-            var urls = urlItems.ToList();
-            builder.AddCheck($"UrlChecks ({group})", async () =>
-            {
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
 
-                var successfulChecks = 0;
-                var description = new StringBuilder();
-                var httpClient = new HttpClient();
+            return AddUrlChecks(builder, urlItems, groupName, CheckStatus.Warning, response => new ValueTask<IHealthCheckResult>(checkFunc(response)));
+        }
 
-                foreach (var url in urlItems)
-                {
-                    try
-                    {
-                        httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
-                        var response = await httpClient.GetAsync(url);
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc)
+        {
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
 
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            successfulChecks++;
-                            description.Append($"UrlCheck SUCCESS ({url}) ");
-                        }
-                        else
-                        {
-                            description.Append($"UrlCheck FAILED ({url}) ");
-                        }
-                    }
-                    catch
-                    {
-                        description.Append($"UrlCheck FAILED ({url}) ");
-                    }
-                }
+            return AddUrlChecks(builder, urlItems, groupName, CheckStatus.Warning, response => checkFunc(response));
+        }
 
-                if (successfulChecks == urls.Count)
-                {
-                    return HealthCheckResult.Healthy(description.ToString());
-                }
-                else if (successfulChecks > 0)
-                {
-                    return HealthCheckResult.Warning(description.ToString());
-                }
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      CheckStatus partialSuccessStatus)
+            => AddUrlChecks(builder, urlItems, groupName, partialSuccessStatus, response => DefaultUrlCheck(response));
 
-                return HealthCheckResult.Unhealthy(description.ToString());
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      CheckStatus partialSuccessStatus, Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
+        {
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
 
-            });
+            return AddUrlChecks(builder, urlItems, groupName, partialSuccessStatus, response => new ValueTask<IHealthCheckResult>(checkFunc(response)));
+        }
+
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      CheckStatus partialSuccessStatus, Func<HttpResponseMessage, Task<IHealthCheckResult>> checkFunc)
+        {
+            Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
+
+            return AddUrlChecks(builder, urlItems, groupName, partialSuccessStatus, response => new ValueTask<IHealthCheckResult>(checkFunc(response)));
+        }
+
+        public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
+                                                      CheckStatus partialSuccessStatus, Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc)
+        {
+            var urls = urlItems?.ToArray();
+
+            Guard.ArgumentNotNull(nameof(builder), builder);
+            Guard.ArgumentNotNullOrEmpty(nameof(urlItems), urls);
+            Guard.ArgumentNotNullOrWhitespace(nameof(groupName), groupName);
+
+            var urlChecker = new UrlChecker(checkFunc, urls) { PartiallyHealthyStatus = partialSuccessStatus };
+            builder.AddCheck($"UrlChecks({groupName})", () => urlChecker.CheckAsync());
             return builder;
         }
 
@@ -167,6 +181,16 @@ namespace Microsoft.Extensions.HealthChecks
             });
 
             return builder;
+        }
+
+        // Helpers
+
+        private static ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
+        {
+            // REVIEW: Should this be an explicit 200 check, or just an "is success" check?
+            var status = response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy;
+            IHealthCheckResult result = HealthCheckResult.FromStatus(status, $"UrlCheck({response.RequestMessage.RequestUri}): status code {response.StatusCode} ({(int)response.StatusCode})");
+            return new ValueTask<IHealthCheckResult>(result);
         }
     }
 }
