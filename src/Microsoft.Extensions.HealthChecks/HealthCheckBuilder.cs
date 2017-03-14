@@ -13,15 +13,26 @@ namespace Microsoft.Extensions.HealthChecks
             Checks = new Dictionary<string, Func<ValueTask<IHealthCheckResult>>>();
         }
 
-        public HealthCheckBuilder AddCheck(string name, Func<Task<IHealthCheckResult>> check)
-        {
-            Checks.Add(name, () => new ValueTask<IHealthCheckResult>(check()));
-            return this;
-        }
-
         public HealthCheckBuilder AddCheck(string name, Func<IHealthCheckResult> check)
         {
-            Checks.Add(name, () => new ValueTask<IHealthCheckResult>(check()));
+            Guard.ArgumentNotNull(nameof(check), check);
+
+            return AddValueTaskCheck(name, () => new ValueTask<IHealthCheckResult>(check()));
+        }
+
+        public HealthCheckBuilder AddCheck(string name, Func<Task<IHealthCheckResult>> check)
+        {
+            Guard.ArgumentNotNull(nameof(check), check);
+
+            return AddValueTaskCheck(name, () => new ValueTask<IHealthCheckResult>(check()));
+        }
+
+        public HealthCheckBuilder AddValueTaskCheck(string name, Func<ValueTask<IHealthCheckResult>> check)
+        {
+            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
+            Guard.ArgumentNotNull(nameof(check), check);
+
+            Checks.Add(name, check);
             return this;
         }
 
