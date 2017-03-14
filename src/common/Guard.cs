@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 static class Guard
 {
@@ -6,6 +7,23 @@ static class Guard
     {
         if (value == null)
             throw new ArgumentNullException(argumentName);
+    }
+
+    public static void ArgumentNotNullOrEmpty<T>(string argumentName, string value)
+    {
+        if (value == null)
+            throw new ArgumentNullException(argumentName);
+        if (string.IsNullOrEmpty(value))
+            throw new ArgumentException("Value cannot be an empty string", argumentName);
+    }
+
+    // Use IReadOnlyCollection<T> instead of IEnumerable<T> to discourage double enumeration
+    public static void ArgumentNotNullOrEmpty<T>(string argumentName, IReadOnlyCollection<T> items)
+    {
+        if (items == null)
+            throw new ArgumentNullException(argumentName);
+        if (items.Count == 0)
+            throw new ArgumentException("Collection must contain at least one item", argumentName);
     }
 
     public static void ArgumentNotNullOrWhitespace(string argumentName, string value)
