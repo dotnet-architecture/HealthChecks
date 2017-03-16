@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             {
                 var response = await httpClient.GetAsync(url);
                 var result = await _checkFunc(response);
-                composite.Add(result);
+                composite.Add($"UrlCheck({url})", result);
             }
 
             return composite;
