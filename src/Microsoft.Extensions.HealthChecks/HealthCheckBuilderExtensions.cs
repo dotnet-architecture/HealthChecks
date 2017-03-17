@@ -24,7 +24,11 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 var currentValue = currentValueFunc();
                 var status = currentValue.CompareTo(minValue) >= 0 ? CheckStatus.Healthy : CheckStatus.Unhealthy;
-                return HealthCheckResult.FromStatus(status, $"{name}: min={minValue}, current={currentValue}");
+                return HealthCheckResult.FromStatus(
+                    status,
+                    $"{name}: min={minValue}, current={currentValue}",
+                    new Dictionary<string, object> { { "min", minValue }, { "current", currentValue } }
+                );
             });
 
             return builder;
@@ -41,7 +45,11 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 var currentValue = currentValueFunc();
                 var status = currentValue.CompareTo(maxValue) <= 0 ? CheckStatus.Healthy : CheckStatus.Unhealthy;
-                return HealthCheckResult.FromStatus(status, $"{name}: max={maxValue}, current={currentValue}");
+                return HealthCheckResult.FromStatus(
+                    status,
+                    $"{name}: max={maxValue}, current={currentValue}",
+                    new Dictionary<string, object> { { "max", maxValue }, { "current", currentValue } }
+                );
             });
 
             return builder;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.Extensions.HealthChecks
@@ -31,6 +32,18 @@ namespace Microsoft.Extensions.HealthChecks
                 var result = await check();
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"CheckName: min=0, current={monitoredValue}", result.Description);
+                Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
+                    kvp =>
+                    {
+                        Assert.Equal("current", kvp.Key);
+                        Assert.Equal(monitoredValue, kvp.Value);
+                    },
+                    kvp =>
+                    {
+                        Assert.Equal("min", kvp.Key);
+                        Assert.Equal(0, kvp.Value);
+                    }
+                );
             }
         }
 
@@ -58,6 +71,18 @@ namespace Microsoft.Extensions.HealthChecks
                 var result = await check();
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"CheckName: max=0, current={monitoredValue}", result.Description);
+                Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
+                    kvp =>
+                    {
+                        Assert.Equal("current", kvp.Key);
+                        Assert.Equal(monitoredValue, kvp.Value);
+                    },
+                    kvp =>
+                    {
+                        Assert.Equal("max", kvp.Key);
+                        Assert.Equal(0, kvp.Value);
+                    }
+                );
             }
         }
     }
