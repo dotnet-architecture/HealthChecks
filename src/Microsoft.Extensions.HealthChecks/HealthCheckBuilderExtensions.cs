@@ -193,12 +193,18 @@ namespace Microsoft.Extensions.HealthChecks
 
         // Helpers
 
-        private static ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
+        private static async ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
         {
             // REVIEW: Should this be an explicit 200 check, or just an "is success" check?
             var status = response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy;
-            IHealthCheckResult result = HealthCheckResult.FromStatus(status, $"UrlCheck({response.RequestMessage.RequestUri}): status code {response.StatusCode} ({(int)response.StatusCode})");
-            return new ValueTask<IHealthCheckResult>(result);
+            var data = new Dictionary<string, object>
+            {
+                { "url", response.RequestMessage.RequestUri.ToString() },
+                { "status", (int)response.StatusCode },
+                { "reason", response.ReasonPhrase },
+                { "body", await response.Content?.ReadAsStringAsync() }
+            };
+            return HealthCheckResult.FromStatus(status, $"UrlCheck({response.RequestMessage.RequestUri}): status code {response.StatusCode} ({(int)response.StatusCode})", data);
         }
     }
 }
