@@ -24,17 +24,14 @@ namespace Microsoft.AspNetCore.HealthChecks
             var connInfo = context.Features.Get<IHttpConnectionFeature>();
             if (connInfo.LocalPort == _healthCheckPort)
             {
-                var healthy = await _checkupService.CheckHealthAsync();
-                if (healthy)
-                {
-                    await context.Response.WriteAsync("HealthCheck: OK");
-                }
-                else
-                {
-                    context.Response.StatusCode = 502;
-                    context.Response.Headers.Add("content-type", "application/json");
-                    await context.Response.WriteAsync(JsonConvert.SerializeObject(_checkupService.CheckResults));
-                }
+                var result = await _checkupService.CheckHealthAsync();
+                var status = result.CheckStatus;
+
+                if (status != CheckStatus.Healthy)
+                    context.Response.StatusCode = 503;
+
+                context.Response.Headers.Add("content-type", "application/json");
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(new { status }));
                 return;
             }
             else
