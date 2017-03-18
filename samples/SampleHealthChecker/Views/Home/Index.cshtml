@@ -1,12 +1,12 @@
-﻿@{
+﻿@model CompositeHealthCheckResult
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div>
-    Cool health checks status:  <strong>@ViewData["AppStatus"] </strong><br />
+    <h1>Overall status: <em>@Model.CheckStatus</em></h1>
 
     <br />
 
-    @ViewData["Results"]
-    
+    @{ await Html.RenderPartialAsync("StatusTable", Model.Results); }
 </div>

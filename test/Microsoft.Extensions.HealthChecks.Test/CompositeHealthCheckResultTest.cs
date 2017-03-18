@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -15,13 +18,27 @@ namespace Microsoft.Extensions.HealthChecks
         {
             var classUnderTest = new CompositeHealthCheckResult();
 
-            // Add(CheckStatus, string)
-            Assert.Throws<ArgumentException>("status", () => classUnderTest.Add(CheckStatus.Unknown, "?"));
-            Assert.Throws<ArgumentNullException>("description", () => classUnderTest.Add(CheckStatus.Healthy, null));
-            Assert.Throws<ArgumentException>("description", () => classUnderTest.Add(CheckStatus.Unhealthy, " "));
+            // Add(string, CheckStatus, string)
+            Assert.Throws<ArgumentNullException>("name", () => classUnderTest.Add(null, CheckStatus.Healthy, "?"));
+            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add(" ", CheckStatus.Healthy, "?"));
+            Assert.Throws<ArgumentException>("status", () => classUnderTest.Add("name", CheckStatus.Unknown, "?"));
+            Assert.Throws<ArgumentNullException>("description", () => classUnderTest.Add("name", CheckStatus.Healthy, null));
+            Assert.Throws<ArgumentException>("description", () => classUnderTest.Add("name", CheckStatus.Unhealthy, " "));
 
-            // Add(IHealthCheckResult)
-            Assert.Throws<ArgumentNullException>("checkResult", () => classUnderTest.Add(null));
+            // Add(string, IHealthCheckResult)
+            var checkResult = HealthCheckResult.Healthy("Hello");
+            Assert.Throws<ArgumentNullException>("name", () => classUnderTest.Add(null, checkResult));
+            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add(" ", checkResult));
+            Assert.Throws<ArgumentNullException>("checkResult", () => classUnderTest.Add("name", null));
+        }
+
+        [Fact]
+        public void NamesMustBeUnique()
+        {
+            var classUnderTest = new CompositeHealthCheckResult();
+            classUnderTest.Add("name", HealthCheckResult.Healthy("healthy"));
+
+            Assert.Throws<ArgumentException>(() => classUnderTest.Add("name", HealthCheckResult.Healthy("healthy")));
         }
 
         [Fact]
@@ -30,27 +47,29 @@ namespace Microsoft.Extensions.HealthChecks
             var classUnderTest = new CompositeHealthCheckResult(partiallyHealthyStatus: CheckStatus.Healthy);
             var warningData = new Dictionary<string, object> { { "Hello", "world" } };
             var unhealthyData = new Dictionary<string, object> { { "The answer", 42 } };
-            classUnderTest.Add(CheckStatus.Warning, "Warning", warningData);
-            classUnderTest.Add(CheckStatus.Unhealthy, "Unhealthy", unhealthyData);
+            classUnderTest.Add("0", CheckStatus.Warning, "Warning", warningData);
+            classUnderTest.Add("1", CheckStatus.Unhealthy, "Unhealthy", unhealthyData);
 
             var results = classUnderTest.Results;
 
             Assert.Collection(results,
-                result =>
+                kvp =>
                 {
-                    Assert.Equal(CheckStatus.Warning, result.CheckStatus);
-                    Assert.Equal("Warning", result.Description);
-                    var kvp = Assert.Single(result.Data);
-                    Assert.Equal("Hello", kvp.Key);
-                    Assert.Equal("world", kvp.Value);
+                    Assert.Equal("0", kvp.Key);
+                    Assert.Equal(CheckStatus.Warning, kvp.Value.CheckStatus);
+                    Assert.Equal("Warning", kvp.Value.Description);
+                    var innerKvp = Assert.Single(kvp.Value.Data);
+                    Assert.Equal("Hello", innerKvp.Key);
+                    Assert.Equal("world", innerKvp.Value);
                 },
-                result =>
+                kvp =>
                 {
-                    Assert.Equal(CheckStatus.Unhealthy, result.CheckStatus);
-                    Assert.Equal("Unhealthy", result.Description);
-                    var kvp = Assert.Single(result.Data);
-                    Assert.Equal("The answer", kvp.Key);
-                    Assert.Equal(42, kvp.Value);
+                    Assert.Equal("1", kvp.Key);
+                    Assert.Equal(CheckStatus.Unhealthy, kvp.Value.CheckStatus);
+                    Assert.Equal("Unhealthy", kvp.Value.Description);
+                    var innerKvp = Assert.Single(kvp.Value.Data);
+                    Assert.Equal("The answer", innerKvp.Key);
+                    Assert.Equal(42, innerKvp.Value);
                 }
             );
         }
@@ -72,7 +91,7 @@ namespace Microsoft.Extensions.HealthChecks
             var classUnderTest = new CompositeHealthCheckResult();
             var description = $"Description for {status}";
 
-            classUnderTest.Add(status, description);
+            classUnderTest.Add("name", status, description);
 
             Assert.Equal(status, classUnderTest.CheckStatus);
             Assert.Equal(description, classUnderTest.Description);
@@ -84,8 +103,8 @@ namespace Microsoft.Extensions.HealthChecks
         {
             var classUnderTest = new CompositeHealthCheckResult();
 
-            classUnderTest.Add(status, "Description 1");
-            classUnderTest.Add(status, "Description 2");
+            classUnderTest.Add("name1", status, "Description 1");
+            classUnderTest.Add("name2", status, "Description 2");
 
             Assert.Equal(status, classUnderTest.CheckStatus);
             Assert.Equal($"Description 1{Environment.NewLine}Description 2", classUnderTest.Description);
@@ -96,8 +115,8 @@ namespace Microsoft.Extensions.HealthChecks
         {
             var classUnderTest = new CompositeHealthCheckResult(partiallyHealthyStatus: CheckStatus.Warning);
 
-            classUnderTest.Add(CheckStatus.Healthy, "Healthy");
-            classUnderTest.Add(CheckStatus.Unhealthy, "Unhealthy");
+            classUnderTest.Add("name1", CheckStatus.Healthy, "Healthy");
+            classUnderTest.Add("name2", CheckStatus.Unhealthy, "Unhealthy");
 
             Assert.Equal(CheckStatus.Warning, classUnderTest.CheckStatus);
         }
@@ -107,8 +126,8 @@ namespace Microsoft.Extensions.HealthChecks
         {
             var classUnderTest = new CompositeHealthCheckResult(partiallyHealthyStatus: CheckStatus.Healthy);
 
-            classUnderTest.Add(CheckStatus.Warning, "Warning");
-            classUnderTest.Add(CheckStatus.Unhealthy, "Unhealthy");
+            classUnderTest.Add("name1", CheckStatus.Warning, "Warning");
+            classUnderTest.Add("name2", CheckStatus.Unhealthy, "Unhealthy");
 
             Assert.Equal(CheckStatus.Unhealthy, classUnderTest.CheckStatus);
         }
@@ -118,15 +137,15 @@ namespace Microsoft.Extensions.HealthChecks
         public void DataIsCompositeDictionary()
         {
             var classUnderTest = new CompositeHealthCheckResult();
-            classUnderTest.Add(CheckStatus.Healthy, "With data", new Dictionary<string, object> { { "Hello", "world" } });
-            classUnderTest.Add(CheckStatus.Healthy, "With data", new Dictionary<string, object> { { "The answer", 42 } });
+            classUnderTest.Add("name1", CheckStatus.Healthy, "With data", new Dictionary<string, object> { { "Hello", "world" } });
+            classUnderTest.Add("name2", CheckStatus.Healthy, "With data", new Dictionary<string, object> { { "The answer", 42 } });
 
             var returnedData = classUnderTest.Data;
 
             Assert.Collection(returnedData,
                 kvp =>
                 {
-                    Assert.Equal("0", kvp.Key);
+                    Assert.Equal("name1", kvp.Key);
                     var dict = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(kvp.Value);
                     var elem = Assert.Single(dict);
                     Assert.Equal("Hello", elem.Key);
@@ -134,7 +153,7 @@ namespace Microsoft.Extensions.HealthChecks
                 },
                 kvp =>
                 {
-                    Assert.Equal("1", kvp.Key);
+                    Assert.Equal("name2", kvp.Key);
                     var dict = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(kvp.Value);
                     var elem = Assert.Single(dict);
                     Assert.Equal("The answer", elem.Key);

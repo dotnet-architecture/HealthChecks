@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,42 +15,39 @@ namespace Microsoft.Extensions.HealthChecks
 
         private ILogger<HealthCheckService> _logger;
 
-        public HealthCheckResults CheckResults { get; set; }
-
         public HealthCheckService(HealthCheckBuilder builder, ILogger<HealthCheckService> logger)
         {
             _checks = builder.Checks;
             _logger = logger;
         }
 
-        public async Task<bool> CheckHealthAsync()
+        public async Task<CompositeHealthCheckResult> CheckHealthAsync(CheckStatus partiallyHealthStatus)
         {
-            StringBuilder logMessage = new StringBuilder();
-            CheckResults = new HealthCheckResults();
+            var logMessage = new StringBuilder();
+            var result = new CompositeHealthCheckResult(partiallyHealthStatus);
 
-            var healthy = true;
             foreach (var check in _checks)
             {
                 try
                 {
                     var healthCheckResult = await check.Value();
-                    CheckResults.CheckResults.Add(healthCheckResult);
-                    healthy &= healthCheckResult.CheckStatus == CheckStatus.Healthy || healthCheckResult.CheckStatus == CheckStatus.Warning;
-                    logMessage.AppendLine($"HealthCheck: {check.Key} : {(healthy ? "Healthy" : "Unhealthy")}");
+                    logMessage.AppendLine($"HealthCheck: {check.Key} : {healthCheckResult.CheckStatus}");
+                    result.Add(check.Key, healthCheckResult);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    healthy &= false;
+                    logMessage.AppendLine($"HealthCheck: {check.Key} : Exception {ex.GetType().FullName} thrown");
+                    result.Add(check.Key, CheckStatus.Unhealthy, "Exception thrown during check");
                 }
             }
 
-            _logger.Log((healthy ? LogLevel.Information : LogLevel.Error), 0, logMessage, null, MessageFormatter);
-            return healthy;
+            if (logMessage.Length == 0)
+                logMessage.AppendLine("HealthCheck: No checks have been registered");
+
+            _logger.Log((result.CheckStatus == CheckStatus.Healthy ? LogLevel.Information : LogLevel.Error), 0, logMessage.ToString(), null, MessageFormatter);
+            return result;
         }
 
-        private static string MessageFormatter(object state, Exception error)
-        {
-            return state.ToString();
-        }
+        private static string MessageFormatter(string state, Exception error) => state;
     }
 }

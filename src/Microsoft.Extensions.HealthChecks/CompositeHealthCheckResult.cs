@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +16,7 @@ namespace Microsoft.Extensions.HealthChecks
         private static readonly IReadOnlyDictionary<string, object> _emptyData = new Dictionary<string, object>();
         private readonly CheckStatus _initialStatus;
         private readonly CheckStatus _partiallyHealthyStatus;
-        private readonly List<IHealthCheckResult> _results = new List<IHealthCheckResult>();
+        private readonly Dictionary<string, IHealthCheckResult> _results = new Dictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
 
         public CompositeHealthCheckResult(CheckStatus partiallyHealthyStatus = CheckStatus.Warning,
                                           CheckStatus initialStatus = CheckStatus.Unknown)
@@ -26,11 +29,11 @@ namespace Microsoft.Extensions.HealthChecks
         {
             get
             {
-                var checkStatuses = new HashSet<CheckStatus>(_results.Select(x => x.CheckStatus));
+                var checkStatuses = new HashSet<CheckStatus>(_results.Select(x => x.Value.CheckStatus));
                 if (checkStatuses.Count == 0)
                     return _initialStatus;
                 if (checkStatuses.Count == 1)
-                    return _results.First().CheckStatus;
+                    return checkStatuses.First();
                 if (checkStatuses.Contains(CheckStatus.Healthy))
                     return _partiallyHealthyStatus;
 
@@ -38,42 +41,43 @@ namespace Microsoft.Extensions.HealthChecks
             }
         }
 
-        public string Description => string.Join(Environment.NewLine, _results.Select(r => r.Description));
+        public string Description => string.Join(Environment.NewLine, _results.Select(r => r.Value.Description));
 
         public IReadOnlyDictionary<string, object> Data
         {
             get
             {
                 var result = new Dictionary<string, object>();
-                var idx = 0;
 
-                foreach (var dictionary in _results.Select(r => r.Data))
-                    result.Add((idx++).ToString(), dictionary);
+                foreach (var kvp in _results)
+                    result.Add(kvp.Key, kvp.Value.Data);
 
                 return result;
             }
         }
 
-        public IReadOnlyList<IHealthCheckResult> Results => _results;
+        public IReadOnlyDictionary<string, IHealthCheckResult> Results => _results;
 
         // REVIEW: Should description be required? Seems redundant for success checks.
 
-        public void Add(CheckStatus status, string description)
-            => Add(status, description, null);
+        public void Add(string name, CheckStatus status, string description)
+            => Add(name, status, description, null);
 
-        public void Add(CheckStatus status, string description, Dictionary<string, object> data)
+        public void Add(string name, CheckStatus status, string description, Dictionary<string, object> data)
         {
+            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
             Guard.ArgumentValid(status != CheckStatus.Unknown, nameof(status), "Cannot add unknown status to composite health check result");
             Guard.ArgumentNotNullOrWhitespace(nameof(description), description);
 
-            _results.Add(HealthCheckResult.FromStatus(status, description, data));
+            _results.Add(name, HealthCheckResult.FromStatus(status, description, data));
         }
 
-        public void Add(IHealthCheckResult checkResult)
+        public void Add(string name, IHealthCheckResult checkResult)
         {
+            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
             Guard.ArgumentNotNull(nameof(checkResult), checkResult);
 
-            _results.Add(checkResult);
+            _results.Add(name, checkResult);
         }
     }
 }

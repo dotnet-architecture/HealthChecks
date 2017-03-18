@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using System;
 using Microsoft.Extensions.HealthChecks;
 
@@ -19,7 +22,8 @@ namespace Microsoft.AspNetCore.Hosting
             var loops = 0;
             do
             {
-                if (healthChecks.CheckHealthAsync().Result)
+                var checkResult = healthChecks.CheckHealthAsync().Result;
+                if (checkResult.CheckStatus == CheckStatus.Healthy)
                 {
                     webHost.Run();
                     break;

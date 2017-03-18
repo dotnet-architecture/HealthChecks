@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E05DCF88-F916-4B61-A5DC-A8344C9E2429}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleHealthChecker", "samples\SampleHealthChecker\SampleHealthChecker.csproj", "{2074E1EA-8744-4FCB-B2A8-436623F6DF7A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Test", "test\Microsoft.Extensions.HealthChecks.Test\Microsoft.Extensions.HealthChecks.Test.csproj", "{D42D0337-8842-4284-A279-AFF9C2C082F2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Data", "src\Microsoft.Extensions.HealthChecks.Data\Microsoft.Extensions.HealthChecks.Data.csproj", "{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{D42D0337-8842-4284-A279-AFF9C2C082F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D42D0337-8842-4284-A279-AFF9C2C082F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D42D0337-8842-4284-A279-AFF9C2C082F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +61,6 @@ Global
 		{A368FA9A-93C8-4F00-A098-E7EEC8462A96} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
 		{2074E1EA-8744-4FCB-B2A8-436623F6DF7A} = {E05DCF88-F916-4B61-A5DC-A8344C9E2429}
 		{D42D0337-8842-4284-A279-AFF9C2C082F2} = {EEADFA4C-4152-405D-BE04-9C62D4A5CFAC}
+		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
 	EndGlobalSection
 EndGlobal
