@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -155,41 +153,6 @@ namespace Microsoft.Extensions.HealthChecks
 
         public static HealthCheckBuilder AddWorkingSetCheck(this HealthCheckBuilder builder, long maxSize)
             => AddMaxValueCheck(builder, $"WorkingSet({maxSize})", maxSize, () => Process.GetCurrentProcess().WorkingSet64);
-
-        //TODO: Move this into a seperate project. Avoid DB dependencies in the main lib.
-        //TODO: It is probably better if this is more generic, not SQL specific.
-        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string connectionString)
-        {
-            builder.AddCheck($"SQL Check:", async () =>
-            {
-                try
-                {
-                    //TODO: There is probably a much better way to do this.
-                    using (var connection = new SqlConnection(connectionString))
-                    {
-                        connection.Open();
-                        using (var command = connection.CreateCommand())
-                        {
-                            command.CommandType = CommandType.Text;
-                            command.CommandText = "SELECT 1";
-                            var result = (int)await command.ExecuteScalarAsync();
-                            if (result == 1)
-                            {
-                                return HealthCheckResult.Healthy($"AddSqlCheck: {connectionString}");
-                            }
-
-                            return HealthCheckResult.Unhealthy($"AddSqlCheck: {connectionString}");
-                        }
-                    }
-                }
-                catch
-                {
-                    return HealthCheckResult.Unhealthy($"AddSqlCheck: {connectionString}");
-                }
-            });
-
-            return builder;
-        }
 
         // Helpers
 
