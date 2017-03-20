@@ -34,7 +34,7 @@ namespace Microsoft.AspNetCore.HealthChecks
                     context.Response.StatusCode = 503;
 
                 context.Response.Headers.Add("content-type", "application/json");
-                await context.Response.WriteAsync(JsonConvert.SerializeObject(new { status }));
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(new { status = status.ToString() }));
                 return;
             }
             else
