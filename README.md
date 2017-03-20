@@ -1,4 +1,4 @@
-Health checks for building services, such as with ASP.NET Core Edit
+Health checks for building services
 ===
 
 
