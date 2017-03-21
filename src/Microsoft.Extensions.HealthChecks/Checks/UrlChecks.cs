@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.HealthChecks.Internal;
@@ -16,7 +15,7 @@ namespace Microsoft.Extensions.HealthChecks
         // URL checks
 
         public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url)
-            => AddUrlCheck(builder, url, response => DefaultUrlCheck(response));
+            => AddUrlCheck(builder, url, response => UrlChecker.DefaultUrlCheck(response));
 
         public static HealthCheckBuilder AddUrlCheck(this HealthCheckBuilder builder, string url,
                                                      Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
@@ -47,7 +46,7 @@ namespace Microsoft.Extensions.HealthChecks
         }
 
         public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName)
-            => AddUrlChecks(builder, urlItems, groupName, CheckStatus.Warning, response => DefaultUrlCheck(response));
+            => AddUrlChecks(builder, urlItems, groupName, CheckStatus.Warning, response => UrlChecker.DefaultUrlCheck(response));
 
         public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
                                                       Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
@@ -75,7 +74,7 @@ namespace Microsoft.Extensions.HealthChecks
 
         public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
                                                       CheckStatus partialSuccessStatus)
-            => AddUrlChecks(builder, urlItems, groupName, partialSuccessStatus, response => DefaultUrlCheck(response));
+            => AddUrlChecks(builder, urlItems, groupName, partialSuccessStatus, response => UrlChecker.DefaultUrlCheck(response));
 
         public static HealthCheckBuilder AddUrlChecks(this HealthCheckBuilder builder, IEnumerable<string> urlItems, string groupName,
                                                       CheckStatus partialSuccessStatus, Func<HttpResponseMessage, IHealthCheckResult> checkFunc)
@@ -105,22 +104,6 @@ namespace Microsoft.Extensions.HealthChecks
             var urlChecker = new UrlChecker(checkFunc, urls) { PartiallyHealthyStatus = partialSuccessStatus };
             builder.AddCheck($"UrlChecks({groupName})", () => urlChecker.CheckAsync());
             return builder;
-        }
-
-        // Helpers
-
-        private static async ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
-        {
-            // REVIEW: Should this be an explicit 200 check, or just an "is success" check?
-            var status = response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy;
-            var data = new Dictionary<string, object>
-            {
-                { "url", response.RequestMessage.RequestUri.ToString() },
-                { "status", (int)response.StatusCode },
-                { "reason", response.ReasonPhrase },
-                { "body", await response.Content?.ReadAsStringAsync() }
-            };
-            return HealthCheckResult.FromStatus(status, $"UrlCheck({response.RequestMessage.RequestUri}): status code {response.StatusCode} ({(int)response.StatusCode})", data);
         }
     }
 }
