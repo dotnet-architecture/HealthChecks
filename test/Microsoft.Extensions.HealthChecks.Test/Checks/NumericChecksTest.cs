@@ -1,17 +1,17 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.Extensions.HealthChecks
+namespace Microsoft.Extensions.HealthChecks.Checks
 {
-    public class HealthCheckBuilderExtensionsTest
+    public class NumericChecksTest
     {
         HealthCheckBuilder builder = new HealthCheckBuilder();
 
-        public class AddMinValueCheck : HealthCheckBuilderExtensionsTest
+        public class AddMinValueCheck : NumericChecksTest
         {
             [Fact]
             public void GuardClauses()
@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
         }
 
-        public class AddMaxValueCheck : HealthCheckBuilderExtensionsTest
+        public class AddMaxValueCheck : NumericChecksTest
         {
             [Fact]
             public void GuardClauses()
