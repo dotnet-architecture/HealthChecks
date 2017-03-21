@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.HealthChecks.Internal;
 
@@ -14,6 +15,102 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public static class HealthCheckBuilderExtensions
     {
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<IHealthCheckResult> check)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromCheck(check, builder.DefaultCacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<CancellationToken, IHealthCheckResult> check)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromCheck(check, builder.DefaultCacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<IHealthCheckResult> check, TimeSpan cacheDuration)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromCheck(check, cacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<CancellationToken, IHealthCheckResult> check, TimeSpan cacheDuration)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromCheck(check, cacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<Task<IHealthCheckResult>> check)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromTaskCheck(check, builder.DefaultCacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<CancellationToken, Task<IHealthCheckResult>> check)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromTaskCheck(check, builder.DefaultCacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<Task<IHealthCheckResult>> check, TimeSpan cacheDuration)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromTaskCheck(check, cacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddCheck(this HealthCheckBuilder builder, string name, Func<CancellationToken, Task<IHealthCheckResult>> check, TimeSpan cacheDuration)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromTaskCheck(check, cacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddValueTaskCheck(this HealthCheckBuilder builder, string name, Func<ValueTask<IHealthCheckResult>> check)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromValueTaskCheck(check, builder.DefaultCacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddValueTaskCheck(this HealthCheckBuilder builder, string name, Func<CancellationToken, ValueTask<IHealthCheckResult>> check)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromValueTaskCheck(check, builder.DefaultCacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddValueTaskCheck(this HealthCheckBuilder builder, string name, Func<ValueTask<IHealthCheckResult>> check, TimeSpan cacheDuration)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromValueTaskCheck(check, cacheDuration));
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddValueTaskCheck(this HealthCheckBuilder builder, string name, Func<CancellationToken, ValueTask<IHealthCheckResult>> check, TimeSpan cacheDuration)
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            builder.AddCheck(name, HealthCheck.FromValueTaskCheck(check, cacheDuration));
+            return builder;
+        }
+
         public static HealthCheckBuilder AddMinValueCheck<T>(this HealthCheckBuilder builder, string name, T minValue, Func<T> currentValueFunc)
             where T : IComparable<T>
         {

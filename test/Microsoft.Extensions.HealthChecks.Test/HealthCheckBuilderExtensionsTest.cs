@@ -29,10 +29,9 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 builder.AddMinValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.GetCheck("CheckName");
-                Assert.NotNull(check);
+                var check = builder.Checks["CheckName"];
 
-                var result = await check();
+                var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"CheckName: min=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
@@ -68,10 +67,9 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 builder.AddMaxValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.GetCheck("CheckName");
-                Assert.NotNull(check);
+                var check = builder.Checks["CheckName"];
 
-                var result = await check();
+                var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"CheckName: max=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),

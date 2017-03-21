@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +12,7 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckService : IHealthCheckService
     {
-        public Dictionary<string, Func<ValueTask<IHealthCheckResult>>> _checks;
+        public IReadOnlyDictionary<string, IHealthCheck> _checks;
 
         private ILogger<HealthCheckService> _logger;
 
@@ -21,16 +22,16 @@ namespace Microsoft.Extensions.HealthChecks
             _logger = logger;
         }
 
-        public async Task<CompositeHealthCheckResult> CheckHealthAsync(CheckStatus partiallyHealthStatus)
+        public async Task<CompositeHealthCheckResult> CheckHealthAsync(CheckStatus partiallyHealthyStatus, CancellationToken cancellationToken)
         {
             var logMessage = new StringBuilder();
-            var result = new CompositeHealthCheckResult(partiallyHealthStatus);
+            var result = new CompositeHealthCheckResult(partiallyHealthyStatus);
 
             foreach (var check in _checks)
             {
                 try
                 {
-                    var healthCheckResult = await check.Value();
+                    var healthCheckResult = await check.Value.CheckAsync();
                     logMessage.AppendLine($"HealthCheck: {check.Key} : {healthCheckResult.CheckStatus}");
                     result.Add(check.Key, healthCheckResult);
                 }
