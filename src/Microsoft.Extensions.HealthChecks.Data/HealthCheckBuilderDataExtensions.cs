@@ -4,6 +4,7 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using Npgsql;
 
 namespace Microsoft.Extensions.HealthChecks
 {
@@ -36,6 +37,28 @@ namespace Microsoft.Extensions.HealthChecks
                 catch(Exception ex)
                 {
                     return HealthCheckResult.Unhealthy($"SqlCheck({name}): Exception during check: {ex.GetType().FullName}");
+                }
+            });
+
+            return builder;
+        }
+
+        public static HealthCheckBuilder AddPostgreSqlCheck(this HealthCheckBuilder builder, string name, string connectionString)
+        {
+            builder.AddCheck($"PostgreSqlCheck({name})", async () =>
+            {
+                try
+                {
+                    using (var connection = new NpgsqlConnection(connectionString))
+                    {
+                        await connection.OpenAsync();
+
+                        return HealthCheckResult.Healthy($"PostgreSqlCheck({name}): Healthy");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return HealthCheckResult.Unhealthy($"PostgreSqlCheck({name}): Exception during check: {ex.GetType().FullName}");
                 }
             });
 
