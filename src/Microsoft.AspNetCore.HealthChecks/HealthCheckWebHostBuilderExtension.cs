@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Hosting
 {
-    public static class WebHostBuilderExtension
+    public static class HealthCheckWebHostBuilderExtension
     {
         public static IWebHostBuilder UseHealthChecks(this IWebHostBuilder builder, int port)
         {

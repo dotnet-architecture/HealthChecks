@@ -6,7 +6,7 @@ using Microsoft.Extensions.HealthChecks;
 
 namespace Microsoft.AspNetCore.Hosting
 {
-    public static class WebHostExtensions
+    public static class HealthCheckWebHostExtensions
     {
         private const int DEFAULT_TIMEOUT_SECONDS = 300;
 
