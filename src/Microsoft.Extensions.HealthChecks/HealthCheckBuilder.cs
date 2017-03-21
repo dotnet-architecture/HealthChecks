@@ -3,48 +3,38 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckBuilder
     {
-        public Dictionary<string, Func<ValueTask<IHealthCheckResult>>> Checks { get; private set; }
+        private readonly Dictionary<string, IHealthCheck> _checks;
 
         public HealthCheckBuilder()
         {
-            Checks = new Dictionary<string, Func<ValueTask<IHealthCheckResult>>>();
+            _checks = new Dictionary<string, IHealthCheck>(StringComparer.OrdinalIgnoreCase);
+            DefaultCacheDuration = TimeSpan.FromMinutes(5);
         }
 
-        public HealthCheckBuilder AddCheck(string name, Func<IHealthCheckResult> check)
-        {
-            Guard.ArgumentNotNull(nameof(check), check);
+        public IReadOnlyDictionary<string, IHealthCheck> Checks => _checks;
 
-            return AddValueTaskCheck(name, () => new ValueTask<IHealthCheckResult>(check()));
-        }
+        public TimeSpan DefaultCacheDuration { get; private set; }
 
-        public HealthCheckBuilder AddCheck(string name, Func<Task<IHealthCheckResult>> check)
-        {
-            Guard.ArgumentNotNull(nameof(check), check);
-
-            return AddValueTaskCheck(name, () => new ValueTask<IHealthCheckResult>(check()));
-        }
-
-        public HealthCheckBuilder AddValueTaskCheck(string name, Func<ValueTask<IHealthCheckResult>> check)
+        public HealthCheckBuilder AddCheck(string name, IHealthCheck check)
         {
             Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
             Guard.ArgumentNotNull(nameof(check), check);
 
-            Checks.Add(name, check);
+            _checks.Add(name, check);
             return this;
         }
 
-        // REVIEW: This is clearly not the right API, but it'll suffice for now for the purposes of testing
-        public Func<ValueTask<IHealthCheckResult>> GetCheck(string name)
+        public HealthCheckBuilder WithDefaultCacheDuration(TimeSpan duration)
         {
-            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
+            Guard.ArgumentValid(duration >= TimeSpan.Zero, nameof(duration), "Duration must be zero (disabled) or a positive duration");
 
-            return Checks.TryGetValue(name, out Func<ValueTask<IHealthCheckResult>> result) ? result : null;
+            DefaultCacheDuration = duration;
+            return this;
         }
     }
 }

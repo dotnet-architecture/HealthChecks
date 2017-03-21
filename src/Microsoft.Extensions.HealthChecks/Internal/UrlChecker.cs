@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -69,6 +70,20 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             var httpClient = GetHttpClient();
             httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
             return httpClient;
+        }
+
+        public static async ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
+        {
+            // REVIEW: Should this be an explicit 200 check, or just an "is success" check?
+            var status = response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy;
+            var data = new Dictionary<string, object>
+            {
+                { "url", response.RequestMessage.RequestUri.ToString() },
+                { "status", (int)response.StatusCode },
+                { "reason", response.ReasonPhrase },
+                { "body", await response.Content?.ReadAsStringAsync() }
+            };
+            return HealthCheckResult.FromStatus(status, $"UrlCheck({response.RequestMessage.RequestUri}): status code {response.StatusCode} ({(int)response.StatusCode})", data);
         }
 
         protected virtual HttpClient GetHttpClient()

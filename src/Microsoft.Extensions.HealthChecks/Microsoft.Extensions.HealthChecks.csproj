@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\common\Guard.cs" Link="common\Guard.cs" />
+    <Compile Include="..\common\Guard.cs" Link="Internal\Guard.cs" />
   </ItemGroup>
 
   <ItemGroup>

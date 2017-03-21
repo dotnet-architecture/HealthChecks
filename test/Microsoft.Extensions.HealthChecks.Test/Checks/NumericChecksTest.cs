@@ -1,17 +1,17 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.Extensions.HealthChecks
+namespace Microsoft.Extensions.HealthChecks.Checks
 {
-    public class HealthCheckBuilderExtensionsTest
+    public class NumericChecksTest
     {
         HealthCheckBuilder builder = new HealthCheckBuilder();
 
-        public class AddMinValueCheck : HealthCheckBuilderExtensionsTest
+        public class AddMinValueCheck : NumericChecksTest
         {
             [Fact]
             public void GuardClauses()
@@ -29,10 +29,9 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 builder.AddMinValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.GetCheck("CheckName");
-                Assert.NotNull(check);
+                var check = builder.Checks["CheckName"];
 
-                var result = await check();
+                var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"CheckName: min=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
@@ -50,7 +49,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
         }
 
-        public class AddMaxValueCheck : HealthCheckBuilderExtensionsTest
+        public class AddMaxValueCheck : NumericChecksTest
         {
             [Fact]
             public void GuardClauses()
@@ -68,10 +67,9 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 builder.AddMaxValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.GetCheck("CheckName");
-                Assert.NotNull(check);
+                var check = builder.Checks["CheckName"];
 
-                var result = await check();
+                var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"CheckName: max=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
