@@ -12,7 +12,7 @@ namespace SampleHealthChecker
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
-                .UseHealthChecks(5050)
+                .UseHealthChecks("/health")     // Or to host on a separate port: .UseHealthChecks(port)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
