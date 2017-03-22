@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.HealthChecks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNet.HealthChecks
+namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you also have access to all the helper methods
 {
     public class GlobalHealthChecks
     {

@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.HealthChecks
                 {
                     var blobClient = storageAccount.CreateCloudBlobClient();
 
-                    var properties = await blobClient.GetServicePropertiesAsync();
+                    var properties = await blobClient.GetServicePropertiesAsync().ConfigureAwait(false);
 
                     if (!String.IsNullOrWhiteSpace(containerName))
                     {
@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.HealthChecks
                 {
                     var tableClient = storageAccount.CreateCloudTableClient();
 
-                    var properties = await tableClient.GetServicePropertiesAsync();
+                    var properties = await tableClient.GetServicePropertiesAsync().ConfigureAwait(false);
 
                     if (String.IsNullOrWhiteSpace(tableName))
                     {
@@ -102,7 +102,7 @@ namespace Microsoft.Extensions.HealthChecks
                 {
                     var fileClient = storageAccount.CreateCloudFileClient();
 
-                    var properties = await fileClient.GetServicePropertiesAsync();
+                    var properties = await fileClient.GetServicePropertiesAsync().ConfigureAwait(false);
 
                     if (!String.IsNullOrWhiteSpace(shareName))
                     {
@@ -141,7 +141,7 @@ namespace Microsoft.Extensions.HealthChecks
                 {
                     var queueClient = storageAccount.CreateCloudQueueClient();
 
-                    var properties = await queueClient.GetServicePropertiesAsync();
+                    var properties = await queueClient.GetServicePropertiesAsync().ConfigureAwait(false);
 
                     if (String.IsNullOrWhiteSpace(queueName))
                     {

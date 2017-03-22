@@ -36,3 +36,11 @@ textarea {
     display: none
   }
 }
+
+blockquote {
+    font-size: inherit;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
+}

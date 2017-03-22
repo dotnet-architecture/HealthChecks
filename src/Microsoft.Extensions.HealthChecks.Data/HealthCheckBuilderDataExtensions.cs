@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.HealthChecks
                         {
                             command.CommandType = CommandType.Text;
                             command.CommandText = "SELECT 1";
-                            var result = (int)await command.ExecuteScalarAsync();
+                            var result = (int)await command.ExecuteScalarAsync().ConfigureAwait(false);
                             if (result == 1)
                             {
                                 return HealthCheckResult.Healthy($"SqlCheck({name}): Healthy");

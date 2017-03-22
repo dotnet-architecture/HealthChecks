@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.HealthChecks;
 using Microsoft.Extensions.HealthChecks;
 
 namespace SampleHealthChecker.AspNet

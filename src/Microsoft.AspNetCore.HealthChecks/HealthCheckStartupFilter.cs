@@ -9,17 +9,28 @@ namespace Microsoft.AspNetCore.HealthChecks
 {
     public class HealthCheckStartupFilter : IStartupFilter
     {
-        int _port;
+        private string _path;
+        private int? _port;
+
         public HealthCheckStartupFilter(int port)
         {
             _port = port;
+        }
+
+        public HealthCheckStartupFilter(string path)
+        {
+            _path = path;
         }
 
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
         {
             return app =>
             {
-                app.UseMiddleware<HealthCheckMiddleware>(_port);
+                if (_port.HasValue)
+                    app.UseMiddleware<HealthCheckMiddleware>(_port);
+                else
+                    app.UseMiddleware<HealthCheckMiddleware>(_path);
+
                 next(app);
             };
         }

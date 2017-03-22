@@ -10,6 +10,8 @@ namespace Microsoft.AspNetCore.Hosting
     {
         public static IWebHostBuilder UseHealthChecks(this IWebHostBuilder builder, int port)
         {
+            Guard.ArgumentValid(port > 0 && port < 65536, nameof(port), "Port must be a value between 1 and 65535");
+
             builder.ConfigureServices(services =>
             {
                 var existingUrl = builder.GetSetting(WebHostDefaults.ServerUrlsKey);
@@ -17,6 +19,17 @@ namespace Microsoft.AspNetCore.Hosting
 
                 services.AddSingleton<IStartupFilter>(new HealthCheckStartupFilter(port));
             });
+            return builder;
+        }
+
+        public static IWebHostBuilder UseHealthChecks(this IWebHostBuilder builder, string path)
+        {
+            Guard.ArgumentNotNull(nameof(path), path);
+            // REVIEW: Is there a better URL path validator somewhere?
+            Guard.ArgumentValid(!path.Contains("?"), nameof(path), "Path cannot contain query string values");
+            Guard.ArgumentValid(path.StartsWith("/"), nameof(path), "Path should start with /");
+
+            builder.ConfigureServices(services => services.AddSingleton<IStartupFilter>(new HealthCheckStartupFilter(path)));
             return builder;
         }
     }

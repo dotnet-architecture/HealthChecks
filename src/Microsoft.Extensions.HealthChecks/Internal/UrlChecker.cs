@@ -34,7 +34,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         {
             var httpClient = CreateHttpClient();
             var result = default(IHealthCheckResult);
-            await CheckUrlAsync(httpClient, _urls[0], (_, checkResult) => result = checkResult);
+            await CheckUrlAsync(httpClient, _urls[0], (_, checkResult) => result = checkResult).ConfigureAwait(false);
             return result;
         }
 
@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
             // REVIEW: Should these be done in parallel?
             foreach (var url in _urls)
-                await CheckUrlAsync(httpClient, url, (name, checkResult) => composite.Add(name, checkResult));
+                await CheckUrlAsync(httpClient, url, (name, checkResult) => composite.Add(name, checkResult)).ConfigureAwait(false);
 
             return composite;
         }
@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             var name = $"UrlCheck({url})";
             try
             {
-                var response = await httpClient.GetAsync(url);
+                var response = await httpClient.GetAsync(url).ConfigureAwait(false);
                 var result = await _checkFunc(response);
                 adder(name, result);
             }

@@ -11,23 +11,30 @@ namespace Microsoft.AspNetCore.HealthChecks
 {
     public class HealthCheckMiddleware
     {
-        RequestDelegate _next;
-        int _healthCheckPort;
-        IHealthCheckService _checkupService;
+        private RequestDelegate _next;
+        private string _path;
+        private int? _port;
+        private IHealthCheckService _service;
 
-        public HealthCheckMiddleware(RequestDelegate next, IHealthCheckService checkupService, int port)
+        public HealthCheckMiddleware(RequestDelegate next, IHealthCheckService service, int port)
         {
-            _healthCheckPort = port;
-            _checkupService = checkupService;
+            _port = port;
+            _service = service;
+            _next = next;
+        }
+
+        public HealthCheckMiddleware(RequestDelegate next, IHealthCheckService service, string path)
+        {
+            _path = path;
+            _service = service;
             _next = next;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            var connInfo = context.Features.Get<IHttpConnectionFeature>();
-            if (connInfo.LocalPort == _healthCheckPort)
+            if (IsHealthCheckRequest(context))
             {
-                var result = await _checkupService.CheckHealthAsync();
+                var result = await _service.CheckHealthAsync();
                 var status = result.CheckStatus;
 
                 if (status != CheckStatus.Healthy)
@@ -41,6 +48,21 @@ namespace Microsoft.AspNetCore.HealthChecks
             {
                 await _next.Invoke(context);
             }
+        }
+
+        private bool IsHealthCheckRequest(HttpContext context)
+        {
+            if (_port.HasValue)
+            {
+                var connInfo = context.Features.Get<IHttpConnectionFeature>();
+                if (connInfo.LocalPort == _port)
+                    return true;
+            }
+
+            if (context.Request.Path == _path)
+                return true;
+
+            return false;
         }
     }
 }

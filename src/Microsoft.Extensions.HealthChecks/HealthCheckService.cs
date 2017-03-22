@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 try
                 {
-                    var healthCheckResult = await check.Value.CheckAsync();
+                    var healthCheckResult = await check.Value.CheckAsync().ConfigureAwait(false);
                     logMessage.AppendLine($"HealthCheck: {check.Key} : {healthCheckResult.CheckStatus}");
                     result.Add(check.Key, healthCheckResult);
                 }
