@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.HealthChecks
                 catch (Exception ex)
                 {
                     logMessage.AppendLine($"HealthCheck: {check.Key} : Exception {ex.GetType().FullName} thrown");
-                    result.Add(check.Key, CheckStatus.Unhealthy, "Exception thrown during check");
+                    result.Add(check.Key, CheckStatus.Unhealthy, $"Exception during check: {ex.GetType().FullName}");
                 }
             }
 
