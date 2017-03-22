@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.9
-MinimumVisualStudioVersion = 10.0.40219.1
+MinimumVisualStudioVersion = 15.0.26228.4
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E05DCF88-F916-4B61-A5DC-A8344C9E2429}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F9BA869A-7D5F-420F-9505-2D881F7934A7}"
@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.Health
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HealthChecks", "src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj", "{A368FA9A-93C8-4F00-A098-E7EEC8462A96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleHealthChecker", "samples\SampleHealthChecker\SampleHealthChecker.csproj", "{2074E1EA-8744-4FCB-B2A8-436623F6DF7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleHealthChecker.AspNetCore", "samples\SampleHealthChecker.AspNetCore\SampleHealthChecker.AspNetCore.csproj", "{2074E1EA-8744-4FCB-B2A8-436623F6DF7A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Test", "test\Microsoft.Extensions.HealthChecks.Test\Microsoft.Extensions.HealthChecks.Test.csproj", "{D42D0337-8842-4284-A279-AFF9C2C082F2}"
 EndProject
