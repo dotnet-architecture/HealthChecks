@@ -36,13 +36,13 @@ namespace Microsoft.Extensions.HealthChecks
                 // and the waiters who aren't allowed to write will just spin wait for the new value.
                 if (Interlocked.Exchange(ref _writerCount, 1) != 0)
                 {
-                    await Task.Delay(5, cancellationToken);
+                    await Task.Delay(5, cancellationToken).ConfigureAwait(false);
                     continue;
                 }
 
                 try
                 {
-                    _cachedResult = await Check(cancellationToken);
+                    _cachedResult = await Check(cancellationToken).ConfigureAwait(false);
                     _cacheExpiration = UtcNow + CacheDuration;
                     break;
                 }
