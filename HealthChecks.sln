@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleHealthChecker.AspNetC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Test", "test\Microsoft.Extensions.HealthChecks.Test\Microsoft.Extensions.HealthChecks.Test.csproj", "{D42D0337-8842-4284-A279-AFF9C2C082F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Data", "src\Microsoft.Extensions.HealthChecks.Data\Microsoft.Extensions.HealthChecks.Data.csproj", "{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.SqlServer", "src\Microsoft.Extensions.HealthChecks.SqlServer\Microsoft.Extensions.HealthChecks.SqlServer.csproj", "{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNet.HealthChecks", "src\Microsoft.AspNet.HealthChecks\Microsoft.AspNet.HealthChecks.csproj", "{2AE82E1C-6CE1-4755-A332-FA359B7CCE72}"
 EndProject
