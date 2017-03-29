@@ -74,7 +74,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         public static async ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
         {
             // REVIEW: Should this be an explicit 200 check, or just an "is success" check?
-            var status = response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy;
+            var status = response.IsSuccessStatusCode ? CheckStatus.Healthy : CheckStatus.Unhealthy;
             var data = new Dictionary<string, object>
             {
                 { "url", response.RequestMessage.RequestUri.ToString() },
