@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.HealthChecks;
 using Newtonsoft.Json;
@@ -11,7 +12,8 @@ namespace Microsoft.AspNet.HealthChecks
 
         public override async Task ProcessRequestAsync(HttpContext context)
         {
-            var result = await GlobalHealthChecks.Service.CheckHealthAsync();
+            var timeoutTokenSource = new CancellationTokenSource(GlobalHealthChecks.HandlerCheckTimeout);
+            var result = await GlobalHealthChecks.Service.CheckHealthAsync(timeoutTokenSource.Token);
             var status = result.CheckStatus;
 
             if (status != CheckStatus.Healthy)
