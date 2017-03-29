@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,18 +30,21 @@ namespace Microsoft.Extensions.HealthChecks
 
             try
             {
-                foreach (var check in _checks)
+                var healthCheckTasks = _checks.Select(check => new { Key = check.Key, Task = check.Value.CheckAsync(cancellationToken).AsTask() }).ToList();
+                await Task.WhenAll(healthCheckTasks.Select(x => x.Task)).ConfigureAwait(false);
+
+                foreach (var healthCheckTask in healthCheckTasks)
                 {
                     try
                     {
-                        var healthCheckResult = await check.Value.CheckAsync().ConfigureAwait(false);
-                        logMessage.AppendLine($"HealthCheck: {check.Key} : {healthCheckResult.CheckStatus}");
-                        result.Add(check.Key, healthCheckResult);
+                        var healthCheckResult = healthCheckTask.Task.Result;
+                        logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : {healthCheckResult.CheckStatus}");
+                        result.Add(healthCheckTask.Key, healthCheckResult);
                     }
                     catch (Exception ex)
                     {
-                        logMessage.AppendLine($"HealthCheck: {check.Key} : Exception {ex.GetType().FullName} thrown");
-                        result.Add(check.Key, CheckStatus.Unhealthy, $"Exception during check: {ex.GetType().FullName}");
+                        logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : Exception {ex.GetType().FullName} thrown");
+                        result.Add(healthCheckTask.Key, CheckStatus.Unhealthy, $"Exception during check: {ex.GetType().FullName}");
                     }
                 }
 

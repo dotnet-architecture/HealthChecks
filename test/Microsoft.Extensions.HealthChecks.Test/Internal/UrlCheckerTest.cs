@@ -54,13 +54,14 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 var response1 = new HttpResponseMessage { StatusCode = code1 };
                 var response2 = new HttpResponseMessage { StatusCode = code2 };
                 Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc =
-                    response => new ValueTask<IHealthCheckResult>(HealthCheckResult.FromStatus(response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy, $"{response.RequestMessage.RequestUri}: {response.StatusCode}"));
+                    response => new ValueTask<IHealthCheckResult>(HealthCheckResult.FromStatus(response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy, $"{response.StatusCode}"));
                 var checker = new TestableUrlChecker(checkFunc, "http://url1/", response1, "http://url2/", response2);
 
                 var result = await checker.CheckAsync();
 
                 Assert.Equal(expectedStatus, result.CheckStatus);
-                Assert.Equal($"http://url1/: {code1}{Environment.NewLine}http://url2/: {code2}", result.Description);
+                Assert.Contains($"UrlCheck(http://url1/): {code1}", result.Description);
+                Assert.Contains($"UrlCheck(http://url2/): {code2}", result.Description);
             }
         }
 
@@ -81,7 +82,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 var result = await UrlChecker.DefaultUrlCheck(response);
 
                 Assert.Equal(CheckStatus.Healthy, result.CheckStatus);
-                Assert.Equal("UrlCheck(http://uri/): status code OK (200)", result.Description);
+                Assert.Equal("status code OK (200)", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key).Select(kvp => $"'{kvp.Key}' = '{kvp.Value}'"),
                     value => Assert.Equal("'body' = 'This is the body content'", value),
                     value => Assert.Equal("'reason' = 'HTTP reason phrase'", value),
@@ -103,7 +104,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 var result = await UrlChecker.DefaultUrlCheck(response);
 
                 Assert.Equal(CheckStatus.Unhealthy, result.CheckStatus);
-                Assert.Equal($"UrlCheck(http://uri/): status code {statusCode} ({(int)statusCode})", result.Description);
+                Assert.Equal($"status code {statusCode} ({(int)statusCode})", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key).Select(kvp => $"'{kvp.Key}' = '{kvp.Value}'"),
                     value => Assert.Equal("'body' = 'This is the body content'", value),
                     value => Assert.Equal("'reason' = 'HTTP reason phrase'", value),
