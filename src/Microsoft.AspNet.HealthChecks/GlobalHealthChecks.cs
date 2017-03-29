@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you also have access to all the helper methods
@@ -7,11 +8,12 @@ namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you al
     {
         static GlobalHealthChecks()
         {
+            // REVIEW: Should we add a way to override the service collection, or just assume no DI here?
             var logger = new LoggerFactory().CreateLogger<HealthCheckService>();
 
-            Builder = new HealthCheckBuilder();
+            Builder = new HealthCheckBuilder(null);
             HandlerCheckTimeout = TimeSpan.FromSeconds(10);
-            Service = new HealthCheckService(Builder, logger);
+            Service = HealthCheckService.FromBuilder(Builder, logger);
         }
 
         public static HealthCheckBuilder Builder { get; }

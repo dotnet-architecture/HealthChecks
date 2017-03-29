@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.HealthChecks
 {
@@ -12,6 +13,17 @@ namespace Microsoft.Extensions.HealthChecks
     /// </summary>
     public class CheckExecutor
     {
+        public static IHealthCheck ResolveCheck(object value, IServiceProvider serviceProvider)
+        {
+            if (value is IHealthCheck healthCheck)
+                return healthCheck;
+
+            if (value is Type healthCheckType)
+                return (IHealthCheck)serviceProvider.GetRequiredService(healthCheckType);
+
+            throw new InvalidOperationException("Unexpected check value; should be Type or IHealthCheck");
+        }
+
         public static ValueTask<IHealthCheckResult> RunCheckAsync(IHealthCheck healthCheck, CancellationToken cancellationToken)
         {
             Guard.ArgumentNotNull(nameof(healthCheck), healthCheck);
