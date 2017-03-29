@@ -9,15 +9,14 @@ using Xunit;
 
 namespace Microsoft.Extensions.HealthChecks
 {
-    public class HealthCheckTest
+    public class CachedHealthCheckTest
     {
         [Fact]
         public void GuardClauses()
         {
             Func<CancellationToken, ValueTask<IHealthCheckResult>> check = _ => new ValueTask<IHealthCheckResult>(default(IHealthCheckResult));
 
-            Assert.Throws<ArgumentNullException>("check", () => new TestableHealthCheck(null, TimeSpan.Zero));
-            Assert.Throws<ArgumentException>("cacheDuration", () => new TestableHealthCheck(check, TimeSpan.FromMinutes(-1)));
+            Assert.Throws<ArgumentException>("cacheDuration", () => new TestableCachedHealthCheck(check, TimeSpan.FromMinutes(-1)));
         }
 
         [Fact]
@@ -26,7 +25,7 @@ namespace Microsoft.Extensions.HealthChecks
             var checkResult = Substitute.For<IHealthCheckResult>();
             var check = Substitute.For<Func<CancellationToken, ValueTask<IHealthCheckResult>>>();
             check(default(CancellationToken)).ReturnsForAnyArgs(new ValueTask<IHealthCheckResult>(checkResult));
-            var healthCheck = new TestableHealthCheck(check);
+            var healthCheck = new TestableCachedHealthCheck(check);
 
             var result = await healthCheck.CheckAsync();
 
@@ -40,7 +39,7 @@ namespace Microsoft.Extensions.HealthChecks
             var checkResult2 = Substitute.For<IHealthCheckResult>();
             var check = Substitute.For<Func<CancellationToken, ValueTask<IHealthCheckResult>>>();
             check(default(CancellationToken)).ReturnsForAnyArgs(new ValueTask<IHealthCheckResult>(checkResult1), new ValueTask<IHealthCheckResult>(checkResult2));
-            var healthCheck = new TestableHealthCheck(check, TimeSpan.FromSeconds(1));
+            var healthCheck = new TestableCachedHealthCheck(check, TimeSpan.FromSeconds(1));
 
             var result1 = await healthCheck.CheckAsync();
             var result2 = await healthCheck.CheckAsync();
@@ -56,7 +55,7 @@ namespace Microsoft.Extensions.HealthChecks
             var checkResult2 = Substitute.For<IHealthCheckResult>();
             var check = Substitute.For<Func<CancellationToken, ValueTask<IHealthCheckResult>>>();
             check(default(CancellationToken)).ReturnsForAnyArgs(new ValueTask<IHealthCheckResult>(checkResult1), new ValueTask<IHealthCheckResult>(checkResult2));
-            var healthCheck = new TestableHealthCheck(check, TimeSpan.FromSeconds(1));
+            var healthCheck = new TestableCachedHealthCheck(check, TimeSpan.FromSeconds(1));
             var now = DateTimeOffset.UtcNow;
 
             healthCheck.SetUtcNow(now);
@@ -82,7 +81,7 @@ namespace Microsoft.Extensions.HealthChecks
             }))());
             var secondTask = new ValueTask<IHealthCheckResult>(checkResult2);
             check(default(CancellationToken)).ReturnsForAnyArgs(firstTask, secondTask);
-            var healthCheck = new TestableHealthCheck(check, TimeSpan.FromSeconds(1));
+            var healthCheck = new TestableCachedHealthCheck(check, TimeSpan.FromSeconds(1));
 
             var task1 = healthCheck.CheckAsync();
             var task2 = healthCheck.CheckAsync();
@@ -94,17 +93,25 @@ namespace Microsoft.Extensions.HealthChecks
             Assert.Same(checkResult1, result2);
         }
 
-        class TestableHealthCheck : HealthCheck
+        class TestableCachedHealthCheck : CachedHealthCheck
         {
+            private readonly Func<CancellationToken, ValueTask<IHealthCheckResult>> _check;
             private DateTimeOffset _utcNow = DateTimeOffset.UtcNow;
 
-            public TestableHealthCheck(Func<CancellationToken, ValueTask<IHealthCheckResult>> check, TimeSpan cacheDuration = default(TimeSpan))
-                : base(check, cacheDuration) { }
+            public TestableCachedHealthCheck(
+                Func<CancellationToken, ValueTask<IHealthCheckResult>> check,
+                TimeSpan cacheDuration = default(TimeSpan)) : base(cacheDuration)
+            {
+                _check = check;
+            }
 
             protected override DateTimeOffset UtcNow => _utcNow;
 
             public void SetUtcNow(DateTimeOffset utcNow)
                 => _utcNow = utcNow;
+
+            protected override ValueTask<IHealthCheckResult> ExecuteCheckAsync(CancellationToken cancellationToken)
+                => _check(cancellationToken);
         }
     }
 }
