@@ -2,12 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.Extensions.HealthChecks
 {
-    // REVIEW: Does this need to be thread safe?
     /// <summary>
     /// Represents a composite health check result built from several results.
     /// </summary>
@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.HealthChecks
         private static readonly IReadOnlyDictionary<string, object> _emptyData = new Dictionary<string, object>();
         private readonly CheckStatus _initialStatus;
         private readonly CheckStatus _partiallyHealthyStatus;
-        private readonly Dictionary<string, IHealthCheckResult> _results = new Dictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, IHealthCheckResult> _results = new ConcurrentDictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
 
         public CompositeHealthCheckResult(CheckStatus partiallyHealthyStatus = CheckStatus.Warning,
                                           CheckStatus initialStatus = CheckStatus.Unknown)
@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
         }
 
-        public string Description => string.Join(Environment.NewLine, _results.Select(r => r.Value.Description));
+        public string Description => string.Join(Environment.NewLine, _results.Select(r => $"{r.Key}: {r.Value.Description}"));
 
         public IReadOnlyDictionary<string, object> Data
         {
@@ -58,8 +58,6 @@ namespace Microsoft.Extensions.HealthChecks
 
         public IReadOnlyDictionary<string, IHealthCheckResult> Results => _results;
 
-        // REVIEW: Should description be required? Seems redundant for success checks.
-
         public void Add(string name, CheckStatus status, string description)
             => Add(name, status, description, null);
 
@@ -69,7 +67,8 @@ namespace Microsoft.Extensions.HealthChecks
             Guard.ArgumentValid(status != CheckStatus.Unknown, nameof(status), "Cannot add unknown status to composite health check result");
             Guard.ArgumentNotNullOrWhitespace(nameof(description), description);
 
-            _results.Add(name, HealthCheckResult.FromStatus(status, description, data));
+            if (!_results.TryAdd(name, HealthCheckResult.FromStatus(status, description, data)))
+                throw new ArgumentException($"Check name {name} must be unique", nameof(name));
         }
 
         public void Add(string name, IHealthCheckResult checkResult)
@@ -77,7 +76,8 @@ namespace Microsoft.Extensions.HealthChecks
             Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
             Guard.ArgumentNotNull(nameof(checkResult), checkResult);
 
-            _results.Add(name, checkResult);
+            if (!_results.TryAdd(name, checkResult))
+                throw new ArgumentException($"Check name {name} must be unique", nameof(name));
         }
     }
 }

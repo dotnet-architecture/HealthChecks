@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.HealthChecks
             var classUnderTest = new CompositeHealthCheckResult();
             classUnderTest.Add("name", HealthCheckResult.Healthy("healthy"));
 
-            Assert.Throws<ArgumentException>(() => classUnderTest.Add("name", HealthCheckResult.Healthy("healthy")));
+            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add("name", HealthCheckResult.Healthy("healthy")));
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Microsoft.Extensions.HealthChecks
 
             var results = classUnderTest.Results;
 
-            Assert.Collection(results,
+            Assert.Collection(results.OrderBy(kvp => kvp.Key),
                 kvp =>
                 {
                     Assert.Equal("0", kvp.Key);
@@ -94,7 +94,7 @@ namespace Microsoft.Extensions.HealthChecks
             classUnderTest.Add("name", status, description);
 
             Assert.Equal(status, classUnderTest.CheckStatus);
-            Assert.Equal(description, classUnderTest.Description);
+            Assert.Equal($"name: {description}", classUnderTest.Description);
         }
 
         [Theory]
@@ -107,7 +107,8 @@ namespace Microsoft.Extensions.HealthChecks
             classUnderTest.Add("name2", status, "Description 2");
 
             Assert.Equal(status, classUnderTest.CheckStatus);
-            Assert.Equal($"Description 1{Environment.NewLine}Description 2", classUnderTest.Description);
+            Assert.Contains($"name1: Description 1", classUnderTest.Description);
+            Assert.Contains($"name2: Description 2", classUnderTest.Description);
         }
 
         [Fact]
@@ -142,7 +143,7 @@ namespace Microsoft.Extensions.HealthChecks
 
             var returnedData = classUnderTest.Data;
 
-            Assert.Collection(returnedData,
+            Assert.Collection(returnedData.OrderBy(x => x.Key),
                 kvp =>
                 {
                     Assert.Equal("name1", kvp.Key);

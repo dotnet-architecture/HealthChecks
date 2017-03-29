@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 
 namespace Microsoft.Extensions.HealthChecks
 {
-    public static class HealthCheckBuilderDataExtensions
+    public static class HealthCheckBuilderSqlServerExtensions
     {
         public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString)
         {

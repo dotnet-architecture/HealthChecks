@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -43,10 +44,8 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             var composite = new CompositeHealthCheckResult(PartiallyHealthyStatus);
             var httpClient = CreateHttpClient();
 
-            // REVIEW: Should these be done in parallel?
-            foreach (var url in _urls)
-                await CheckUrlAsync(httpClient, url, (name, checkResult) => composite.Add(name, checkResult)).ConfigureAwait(false);
-
+            var tasks = _urls.Select(url => CheckUrlAsync(httpClient, url, (name, checkResult) => composite.Add(name, checkResult))).ToList();
+            await Task.WhenAll(tasks).ConfigureAwait(false);
             return composite;
         }
 
@@ -83,7 +82,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 { "reason", response.ReasonPhrase },
                 { "body", await response.Content?.ReadAsStringAsync() }
             };
-            return HealthCheckResult.FromStatus(status, $"UrlCheck({response.RequestMessage.RequestUri}): status code {response.StatusCode} ({(int)response.StatusCode})", data);
+            return HealthCheckResult.FromStatus(status, $"status code {response.StatusCode} ({(int)response.StatusCode})", data);
         }
 
         protected virtual HttpClient GetHttpClient()
