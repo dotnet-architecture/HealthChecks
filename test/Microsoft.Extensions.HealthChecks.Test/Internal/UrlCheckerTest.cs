@@ -1,14 +1,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using NSubstitute;
 using Xunit;
 
 namespace Microsoft.Extensions.HealthChecks.Internal
@@ -21,14 +20,14 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc = response => default(ValueTask<IHealthCheckResult>);
 
             Assert.Throws<ArgumentNullException>("checkFunc", () => new UrlChecker(null, "https://url"));
-            Assert.Throws<ArgumentNullException>("urls", () => new UrlChecker(checkFunc, null));
-            Assert.Throws<ArgumentException>("urls", () => new UrlChecker(checkFunc, new string[0]));
+            Assert.Throws<ArgumentNullException>("url", () => new UrlChecker(checkFunc, null));
+            Assert.Throws<ArgumentException>("url", () => new UrlChecker(checkFunc, " "));
         }
 
         public class CheckAsync
         {
             [Fact]
-            public async void SingleUrl_CallsHttpClientWithNoCache_ReturnsCheckFunctionResult()
+            public async void CallsHttpClientWithNoCache_ReturnsCheckFunctionResult()
             {
                 var response = new HttpResponseMessage();
                 var checkResult = HealthCheckResult.Healthy("This is a healthy response");
@@ -43,25 +42,6 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 Assert.Equal(HttpMethod.Get, response.RequestMessage.Method);
                 Assert.Equal("http://url1/", response.RequestMessage.RequestUri.ToString());
                 Assert.Equal(true, response.RequestMessage.Headers.CacheControl.NoCache);
-            }
-
-            [Theory]
-            [InlineData(HttpStatusCode.OK, HttpStatusCode.OK, CheckStatus.Healthy)]
-            [InlineData(HttpStatusCode.OK, HttpStatusCode.InternalServerError, CheckStatus.Warning)]
-            [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, CheckStatus.Unhealthy)]
-            public async void MultipleUrls_ReturnsCompositeResult(HttpStatusCode code1, HttpStatusCode code2, CheckStatus expectedStatus)
-            {
-                var response1 = new HttpResponseMessage { StatusCode = code1 };
-                var response2 = new HttpResponseMessage { StatusCode = code2 };
-                Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc =
-                    response => new ValueTask<IHealthCheckResult>(HealthCheckResult.FromStatus(response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy, $"{response.StatusCode}"));
-                var checker = new TestableUrlChecker(checkFunc, "http://url1/", response1, "http://url2/", response2);
-
-                var result = await checker.CheckAsync();
-
-                Assert.Equal(expectedStatus, result.CheckStatus);
-                Assert.Contains($"UrlCheck(http://url1/): {code1}", result.Description);
-                Assert.Contains($"UrlCheck(http://url2/): {code2}", result.Description);
             }
 
             [Fact]
@@ -132,33 +112,17 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         {
             private readonly HttpMessageHandler _handler;
 
-            // Single URL
+            // URL and response
             public TestableUrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc,
                                       string url, HttpResponseMessage response)
-                : base(checkFunc, new[] { url })
+                : base(checkFunc, url)
             {
-                var handler = new ResponseHandler();
-                handler.Add(url, response);
-
-                _handler = handler;
-            }
-
-            // Two URLs
-            public TestableUrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc,
-                                      string url1, HttpResponseMessage response1,
-                                      string url2, HttpResponseMessage response2)
-                : base(checkFunc, new[] { url1, url2 })
-            {
-                var handler = new ResponseHandler();
-                handler.Add(url1, response1);
-                handler.Add(url2, response2);
-
-                _handler = handler;
+                _handler = new ResponseHandler(url, response);
             }
 
             // Exception
             public TestableUrlChecker(Exception exceptionToThrow, string url)
-                : base(response => { throw new DivideByZeroException(); }, new[] { url })
+                : base(response => { throw new DivideByZeroException(); }, url)
             {
                 _handler = new ExceptionHandler(exceptionToThrow);
             }
@@ -180,16 +144,18 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             class ResponseHandler : HttpMessageHandler
             {
                 private static readonly HttpResponseMessage _defaultResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound };
-                private readonly Dictionary<string, HttpResponseMessage> _responses = new Dictionary<string, HttpResponseMessage>(StringComparer.OrdinalIgnoreCase);
+                private readonly HttpResponseMessage _response;
+                private readonly string _url;
 
-                public void Add(string uri, HttpResponseMessage response)
-                    => _responses.Add(uri, response);
+                public ResponseHandler(string url, HttpResponseMessage response)
+                {
+                    _url = url;
+                    _response = response;
+                }
 
                 protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
                 {
-                    if (!_responses.TryGetValue(request.RequestUri.ToString(), out var response))
-                        response = _defaultResponse;
-
+                    var response = _url == request.RequestUri.ToString() ? _response : _defaultResponse;
                     response.RequestMessage = request;
                     return Task.FromResult(response);
                 }

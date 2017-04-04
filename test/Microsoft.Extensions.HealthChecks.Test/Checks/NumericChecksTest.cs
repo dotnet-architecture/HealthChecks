@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.HealthChecks.Checks
 
                 var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
-                Assert.Equal($"CheckName: min=0, current={monitoredValue}", result.Description);
+                Assert.Equal($"min=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
                     kvp =>
                     {
@@ -71,7 +71,7 @@ namespace Microsoft.Extensions.HealthChecks.Checks
 
                 var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
-                Assert.Equal($"CheckName: max=0, current={monitoredValue}", result.Description);
+                Assert.Equal($"max=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
                     kvp =>
                     {

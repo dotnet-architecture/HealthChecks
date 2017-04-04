@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +15,7 @@ namespace Microsoft.Extensions.HealthChecks
         private static readonly IReadOnlyDictionary<string, object> _emptyData = new Dictionary<string, object>();
         private readonly CheckStatus _initialStatus;
         private readonly CheckStatus _partiallyHealthyStatus;
-        private readonly ConcurrentDictionary<string, IHealthCheckResult> _results = new ConcurrentDictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, IHealthCheckResult> _results = new Dictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
 
         public CompositeHealthCheckResult(CheckStatus partiallyHealthyStatus = CheckStatus.Warning,
                                           CheckStatus initialStatus = CheckStatus.Unknown)
@@ -67,8 +66,7 @@ namespace Microsoft.Extensions.HealthChecks
             Guard.ArgumentValid(status != CheckStatus.Unknown, nameof(status), "Cannot add unknown status to composite health check result");
             Guard.ArgumentNotNullOrWhitespace(nameof(description), description);
 
-            if (!_results.TryAdd(name, HealthCheckResult.FromStatus(status, description, data)))
-                throw new ArgumentException($"Check name {name} must be unique", nameof(name));
+            _results.Add(name, HealthCheckResult.FromStatus(status, description, data));
         }
 
         public void Add(string name, IHealthCheckResult checkResult)
@@ -76,8 +74,7 @@ namespace Microsoft.Extensions.HealthChecks
             Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
             Guard.ArgumentNotNull(nameof(checkResult), checkResult);
 
-            if (!_results.TryAdd(name, checkResult))
-                throw new ArgumentException($"Check name {name} must be unique", nameof(name));
+            _results.Add(name, checkResult);
         }
     }
 }
