@@ -16,7 +16,6 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         private readonly Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> _checkFunc;
         private readonly string[] _urls;
 
-        // REVIEW: Cache timeout here?
         public UrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc, params string[] urls)
         {
             Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
