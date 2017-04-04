@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you al
 
         public static IHealthCheckService Service { get; }
 
-        public void SetHandlerCheckTimeout(TimeSpan timeout)
+        public static void SetHandlerCheckTimeout(TimeSpan timeout)
         {
             Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span");
 

@@ -34,16 +34,10 @@ namespace Microsoft.Extensions.HealthChecks
                     continue;
                 }
 
-                try
-                {
-                    CachedResult = await ExecuteCheckAsync(cancellationToken).ConfigureAwait(false);
-                    _cacheExpiration = UtcNow + CacheDuration;
-                    break;
-                }
-                finally
-                {
-                    _writerCount = 0;
-                }
+                CachedResult = await CheckExecutor.RunCheckAsync(ExecuteCheckAsync, cancellationToken);
+                _cacheExpiration = UtcNow + CacheDuration;
+                _writerCount = 0;
+                break;
             }
 
             return CachedResult;

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,42 +24,18 @@ namespace Microsoft.Extensions.HealthChecks
 
         public async Task<CompositeHealthCheckResult> CheckHealthAsync(CheckStatus partiallyHealthyStatus, CancellationToken cancellationToken)
         {
+            var results = await CheckExecutor.RunChecksAsync(_checks, partiallyHealthyStatus, cancellationToken);
             var logMessage = new StringBuilder();
-            var result = new CompositeHealthCheckResult(partiallyHealthyStatus);
 
-            try
-            {
-                var healthCheckTasks = _checks.Select(check => new { Key = check.Key, Task = check.Value.CheckAsync(cancellationToken).AsTask() }).ToList();
-                await Task.WhenAll(healthCheckTasks.Select(x => x.Task)).ConfigureAwait(false);
+            // REVIEW: This only logs the top-level results. Should we dive into composites when logging?
+            foreach (var result in results.Results)
+                logMessage.AppendLine($"HealthCheck: {result.Key} : {result.Value.CheckStatus} : {result.Value.Description}");
 
-                foreach (var healthCheckTask in healthCheckTasks)
-                {
-                    try
-                    {
-                        var healthCheckResult = healthCheckTask.Task.Result;
-                        logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : {healthCheckResult.CheckStatus}");
-                        result.Add(healthCheckTask.Key, healthCheckResult);
-                    }
-                    catch (Exception ex)
-                    {
-                        logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : Exception {ex.GetType().FullName} thrown");
-                        result.Add(healthCheckTask.Key, CheckStatus.Unhealthy, $"Exception during check: {ex.GetType().FullName}");
-                    }
-                }
+            if (logMessage.Length == 0)
+                logMessage.AppendLine("HealthCheck: No checks have been registered");
 
-                if (logMessage.Length == 0)
-                    logMessage.AppendLine("HealthCheck: No checks have been registered");
-
-                _logger.Log((result.CheckStatus == CheckStatus.Healthy ? LogLevel.Information : LogLevel.Error), 0, logMessage.ToString(), null, MessageFormatter);
-                return result;
-            }
-            catch (TaskCanceledException)
-            {
-                result = new CompositeHealthCheckResult();
-                result.Add("*", CheckStatus.Unhealthy, "The health check operation timed out");
-                _logger.Log(LogLevel.Warning, 0, result.Description, null, MessageFormatter);
-                return result;
-            }
+            _logger.Log((results.CheckStatus == CheckStatus.Healthy ? LogLevel.Information : LogLevel.Error), 0, logMessage.ToString(), null, MessageFormatter);
+            return results;
         }
 
         private static string MessageFormatter(string state, Exception error) => state;

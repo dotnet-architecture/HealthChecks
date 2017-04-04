@@ -2,10 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI;
-using Microsoft.AspNet.HealthChecks;
 using Microsoft.Extensions.HealthChecks;
 
 namespace SampleHealthChecker.AspNet
@@ -13,6 +13,7 @@ namespace SampleHealthChecker.AspNet
     public partial class Default : Page
     {
         public CompositeHealthCheckResult CheckResult;
+        public TimeSpan ExecutionTime;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -21,7 +22,12 @@ namespace SampleHealthChecker.AspNet
 
         private async Task GetChecksAsync(CancellationToken cancellationToken)
         {
-            CheckResult = await GlobalHealthChecks.Service.CheckHealthAsync(cancellationToken);
+            var timedTokenSource = new CancellationTokenSource(GlobalHealthChecks.HandlerCheckTimeout);
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timedTokenSource.Token);
+
+            var stopwatch = Stopwatch.StartNew();
+            CheckResult = await GlobalHealthChecks.Service.CheckHealthAsync(linkedTokenSource.Token);
+            ExecutionTime = stopwatch.Elapsed;
         }
     }
 }
