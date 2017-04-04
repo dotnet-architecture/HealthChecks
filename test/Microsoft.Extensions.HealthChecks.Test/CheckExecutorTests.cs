@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Xunit;
 
@@ -47,6 +49,37 @@ namespace Microsoft.Extensions.HealthChecks
                 Assert.Equal(CheckStatus.Unhealthy, result.CheckStatus);
                 Assert.Equal<object>("The health check operation timed out", result.Description);
                 Assert.Empty(result.Data);
+            }
+        }
+
+        public class RunChecksAsync
+        {
+            [Fact]
+            public async void GuardClause()
+            {
+                await Assert.ThrowsAsync<ArgumentNullException>("healthChecks", () => CheckExecutor.RunChecksAsync(null, CheckStatus.Unhealthy, default(CancellationToken)));
+            }
+
+            [Fact]
+            public async void RunsAllChecks()
+            {
+                var check1 = HealthCheck.FromCheck(() => HealthCheckResult.Healthy("Healthy check"), TimeSpan.Zero);
+                var check2 = HealthCheck.FromCheck(() => HealthCheckResult.Unhealthy("Unhealthy check"), TimeSpan.Zero);
+                var check3 = HealthCheck.FromCheck(() => throw new DivideByZeroException(), TimeSpan.Zero);
+                var check4 = HealthCheck.FromCheck(token => { token.ThrowIfCancellationRequested(); return HealthCheckResult.Healthy("Happy check"); }, TimeSpan.Zero);
+                var cts = new CancellationTokenSource();
+                cts.Cancel();
+                var checks = new Dictionary<string, IHealthCheck> { { "c1", check1 }, { "c2", check2 }, { "c3", check3 }, { "c4", check4 } };
+
+                var result = await CheckExecutor.RunChecksAsync(checks, CheckStatus.Warning, cts.Token);
+
+                Assert.Equal(CheckStatus.Warning, result.CheckStatus);
+                Assert.Collection(result.Results.OrderBy(kvp => kvp.Key).Select(kvp => $"'{kvp.Key}' = '{kvp.Value.CheckStatus} ({kvp.Value.Description})'"),
+                    item => Assert.Equal("'c1' = 'Healthy (Healthy check)'", item),
+                    item => Assert.Equal("'c2' = 'Unhealthy (Unhealthy check)'", item),
+                    item => Assert.Equal($"'c3' = 'Unhealthy (Exception during check: {typeof(DivideByZeroException).FullName})'", item),
+                    item => Assert.Equal("'c4' = 'Unhealthy (The health check operation timed out)'", item)
+                );
             }
         }
     }
