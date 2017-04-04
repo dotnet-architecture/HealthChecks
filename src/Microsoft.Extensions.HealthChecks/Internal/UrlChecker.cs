@@ -60,7 +60,8 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             }
             catch (Exception ex)
             {
-                adder(name, HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}"));
+                var data = new Dictionary<string, object> { { "url", url } };
+                adder(name, HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}", data));
             }
         }
 

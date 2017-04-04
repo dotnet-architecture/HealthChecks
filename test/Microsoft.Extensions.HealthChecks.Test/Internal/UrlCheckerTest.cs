@@ -63,6 +63,19 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 Assert.Contains($"UrlCheck(http://url1/): {code1}", result.Description);
                 Assert.Contains($"UrlCheck(http://url2/): {code2}", result.Description);
             }
+
+            [Fact]
+            public async void ReturnedDataIncludesUrlWhenExceptionIsThrown()
+            {
+                var exception = new DivideByZeroException();
+                var checker = new TestableUrlChecker(exception, "http://uri/");
+
+                var result = await checker.CheckAsync();
+
+                Assert.Collection(result.Data.OrderBy(kvp => kvp.Key).Select(kvp => $"'{kvp.Key}' = '{kvp.Value}'"),
+                    value => Assert.Equal("'url' = 'http://uri/'", value)
+                );
+            }
         }
 
         public class DefaultUrlCheck
@@ -116,14 +129,17 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
         class TestableUrlChecker : UrlChecker
         {
-            private readonly Dictionary<string, HttpResponseMessage> _responses = new Dictionary<string, HttpResponseMessage>(StringComparer.OrdinalIgnoreCase);
+            private readonly HttpMessageHandler _handler;
 
             // Single URL
             public TestableUrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc,
                                       string url, HttpResponseMessage response)
                 : base(checkFunc, new[] { url })
             {
-                _responses.Add(url, response);
+                var handler = new ResponseHandler();
+                handler.Add(url, response);
+
+                _handler = handler;
             }
 
             // Two URLs
@@ -132,22 +148,38 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                                       string url2, HttpResponseMessage response2)
                 : base(checkFunc, new[] { url1, url2 })
             {
-                _responses.Add(url1, response1);
-                _responses.Add(url2, response2);
+                var handler = new ResponseHandler();
+                handler.Add(url1, response1);
+                handler.Add(url2, response2);
+
+                _handler = handler;
+            }
+
+            // Exception
+            public TestableUrlChecker(Exception exceptionToThrow, string url)
+                : base(response => { throw new DivideByZeroException(); }, new[] { url })
+            {
+                _handler = new ExceptionHandler(exceptionToThrow);
             }
 
             protected override HttpClient GetHttpClient()
-                => new HttpClient(new Handler(_responses));
+                => new HttpClient(_handler);
 
-            class Handler : HttpMessageHandler
+            class ExceptionHandler : HttpMessageHandler
+            {
+                private readonly Exception _exceptionToThrow;
+
+                public ExceptionHandler(Exception exceptionToThrow)
+                    => _exceptionToThrow = exceptionToThrow;
+
+                protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+                    => throw _exceptionToThrow;
+            }
+
+            class ResponseHandler : HttpMessageHandler
             {
                 private static readonly HttpResponseMessage _defaultResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound };
-                private readonly Dictionary<string, HttpResponseMessage> _responses;
-
-                public Handler(Dictionary<string, HttpResponseMessage> responses)
-                {
-                    _responses = responses;
-                }
+                private readonly Dictionary<string, HttpResponseMessage> _responses = new Dictionary<string, HttpResponseMessage>(StringComparer.OrdinalIgnoreCase);
 
                 public void Add(string uri, HttpResponseMessage response)
                     => _responses.Add(uri, response);
