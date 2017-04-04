@@ -27,40 +27,21 @@ namespace Microsoft.Extensions.HealthChecks
         {
             var logMessage = new StringBuilder();
             var result = new CompositeHealthCheckResult(partiallyHealthyStatus);
+            var healthCheckTasks = _checks.Select(check => new { Key = check.Key, Task = CheckExecutor.RunCheckAsync(check.Value, cancellationToken).AsTask() }).ToList();
+            await Task.WhenAll(healthCheckTasks.Select(x => x.Task)).ConfigureAwait(false);
 
-            try
+            foreach (var healthCheckTask in healthCheckTasks)
             {
-                var healthCheckTasks = _checks.Select(check => new { Key = check.Key, Task = check.Value.CheckAsync(cancellationToken).AsTask() }).ToList();
-                await Task.WhenAll(healthCheckTasks.Select(x => x.Task)).ConfigureAwait(false);
-
-                foreach (var healthCheckTask in healthCheckTasks)
-                {
-                    try
-                    {
-                        var healthCheckResult = healthCheckTask.Task.Result;
-                        logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : {healthCheckResult.CheckStatus}");
-                        result.Add(healthCheckTask.Key, healthCheckResult);
-                    }
-                    catch (Exception ex)
-                    {
-                        logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : Exception {ex.GetType().FullName} thrown");
-                        result.Add(healthCheckTask.Key, CheckStatus.Unhealthy, $"Exception during check: {ex.GetType().FullName}");
-                    }
-                }
-
-                if (logMessage.Length == 0)
-                    logMessage.AppendLine("HealthCheck: No checks have been registered");
-
-                _logger.Log((result.CheckStatus == CheckStatus.Healthy ? LogLevel.Information : LogLevel.Error), 0, logMessage.ToString(), null, MessageFormatter);
-                return result;
+                var healthCheckResult = healthCheckTask.Task.Result;
+                logMessage.AppendLine($"HealthCheck: {healthCheckTask.Key} : {healthCheckResult.CheckStatus} : {healthCheckResult.Description}");
+                result.Add(healthCheckTask.Key, healthCheckResult);
             }
-            catch (TaskCanceledException)
-            {
-                result = new CompositeHealthCheckResult();
-                result.Add("*", CheckStatus.Unhealthy, "The health check operation timed out");
-                _logger.Log(LogLevel.Warning, 0, result.Description, null, MessageFormatter);
-                return result;
-            }
+
+            if (logMessage.Length == 0)
+                logMessage.AppendLine("HealthCheck: No checks have been registered");
+
+            _logger.Log((result.CheckStatus == CheckStatus.Healthy ? LogLevel.Information : LogLevel.Error), 0, logMessage.ToString(), null, MessageFormatter);
+            return result;
         }
 
         private static string MessageFormatter(string state, Exception error) => state;

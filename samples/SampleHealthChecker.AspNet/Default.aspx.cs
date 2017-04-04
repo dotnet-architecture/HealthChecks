@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI;
-using Microsoft.AspNet.HealthChecks;
 using Microsoft.Extensions.HealthChecks;
 
 namespace SampleHealthChecker.AspNet
@@ -21,7 +20,10 @@ namespace SampleHealthChecker.AspNet
 
         private async Task GetChecksAsync(CancellationToken cancellationToken)
         {
-            CheckResult = await GlobalHealthChecks.Service.CheckHealthAsync(cancellationToken);
+            var timedTokenSource = new CancellationTokenSource(GlobalHealthChecks.HandlerCheckTimeout);
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timedTokenSource.Token);
+
+            CheckResult = await GlobalHealthChecks.Service.CheckHealthAsync(linkedTokenSource.Token);
         }
     }
 }

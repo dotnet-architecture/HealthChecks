@@ -1,10 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.HealthChecks;
-using Newtonsoft.Json;
 
 namespace SampleHealthChecker.Controllers
 {
@@ -19,7 +20,8 @@ namespace SampleHealthChecker.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var checkResult = await _healthCheck.CheckHealthAsync();
+            var timedTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            var checkResult = await _healthCheck.CheckHealthAsync(timedTokenSource.Token);
             return View(checkResult);
         }
     }
