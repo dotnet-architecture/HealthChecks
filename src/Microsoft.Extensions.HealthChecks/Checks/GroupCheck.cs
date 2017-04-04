@@ -2,8 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.HealthChecks
 {
@@ -21,22 +19,10 @@ namespace Microsoft.Extensions.HealthChecks
             Guard.ArgumentNotNullOrWhitespace(nameof(groupName), groupName);
             Guard.ArgumentNotNull(nameof(innerChecks), innerChecks);
 
-            var innerBuilder = new HealthCheckBuilder();
+            var innerBuilder = new HealthCheckBuilder(builder.ServiceCollection);
             innerChecks(innerBuilder);
 
-            builder.AddCheck($"Group({groupName})", async cancellationToken =>
-            {
-                var result = new CompositeHealthCheckResult(partiallyHealthyStatus);
-                var checkResults = innerBuilder.Checks.Select(check => new { Name = check.Key, Operation = check.Value.CheckAsync(cancellationToken).AsTask() }).ToList();
-                await Task.WhenAll(checkResults.Select(x => x.Operation)).ConfigureAwait(false);
-
-                foreach (var checkResult in checkResults)
-                {
-                    result.Add(checkResult.Name, checkResult.Operation.Result);
-                }
-
-                return result;
-            });
+            builder.AddCheck($"Group({groupName})", cancellationToken => CheckExecutor.RunChecksAsync(innerBuilder.Checks, partiallyHealthyStatus, cancellationToken));
 
             return builder;
         }

@@ -3,13 +3,14 @@
 
 using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Microsoft.Extensions.HealthChecks.Checks
 {
     public class NumericChecksTest
     {
-        HealthCheckBuilder builder = new HealthCheckBuilder();
+        HealthCheckBuilder builder = new HealthCheckBuilder(new ServiceCollection());
 
         public class AddMinValueCheck : NumericChecksTest
         {
@@ -29,7 +30,7 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             {
                 builder.AddMinValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.Checks["CheckName"];
+                var check = (IHealthCheck)builder.Checks["CheckName"];
 
                 var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);
@@ -67,7 +68,7 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             {
                 builder.AddMaxValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.Checks["CheckName"];
+                var check = (IHealthCheck)builder.Checks["CheckName"];
 
                 var result = await check.CheckAsync();
                 Assert.Equal(expectedStatus, result.CheckStatus);

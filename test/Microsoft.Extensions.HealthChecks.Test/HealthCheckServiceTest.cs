@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.HealthChecks.Fakes;
 using Xunit;
 
@@ -16,9 +17,9 @@ namespace Microsoft.Extensions.HealthChecks
 
         public HealthCheckServiceTest()
         {
-            _builder = new HealthCheckBuilder();
+            _builder = new HealthCheckBuilder(new ServiceCollection());
             _logger = new FakeLogger<HealthCheckService>();
-            _classUnderTest = new HealthCheckService(_builder, _logger);
+            _classUnderTest = HealthCheckService.FromBuilder(_builder, _logger);
         }
 
         [Fact]
