@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EEADFA4C-4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks", "src\Microsoft.Extensions.HealthChecks\Microsoft.Extensions.HealthChecks.csproj", "{26A77B9A-5599-4BBA-8C5C-90DF1A4F4558}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Azure", "src\Microsoft.Extensions.HealthChecks.Azure\Microsoft.Extensions.HealthChecks.Azure.csproj", "{0C4158B7-7153-4D2E-ABFA-4CE07D44F75F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.AzureStorage", "src\Microsoft.Extensions.HealthChecks.AzureStorage\Microsoft.Extensions.HealthChecks.AzureStorage.csproj", "{0C4158B7-7153-4D2E-ABFA-4CE07D44F75F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.HealthChecks", "src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj", "{A368FA9A-93C8-4F00-A098-E7EEC8462A96}"
 EndProject

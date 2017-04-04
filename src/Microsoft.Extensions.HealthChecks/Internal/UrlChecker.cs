@@ -16,7 +16,6 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         private readonly Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> _checkFunc;
         private readonly string[] _urls;
 
-        // REVIEW: Cache timeout here?
         public UrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc, params string[] urls)
         {
             Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
@@ -60,7 +59,8 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             }
             catch (Exception ex)
             {
-                adder(name, HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}"));
+                var data = new Dictionary<string, object> { { "url", url } };
+                adder(name, HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}", data));
             }
         }
 
@@ -73,8 +73,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
         public static async ValueTask<IHealthCheckResult> DefaultUrlCheck(HttpResponseMessage response)
         {
-            // REVIEW: Should this be an explicit 200 check, or just an "is success" check?
-            var status = response.StatusCode == HttpStatusCode.OK ? CheckStatus.Healthy : CheckStatus.Unhealthy;
+            var status = response.IsSuccessStatusCode ? CheckStatus.Healthy : CheckStatus.Unhealthy;
             var data = new Dictionary<string, object>
             {
                 { "url", response.RequestMessage.RequestUri.ToString() },
