@@ -11,6 +11,7 @@
 </head>
 <body>
     <div class="container body-content">
+        <h6 class="pull-right">Elapsed time: <%: ExecutionTime.Milliseconds %>ms</h6>
         <h1>Overall status: <em><%: CheckResult.CheckStatus %></em></h1>
 
         <br />

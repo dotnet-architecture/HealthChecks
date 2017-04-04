@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,9 @@ namespace SampleHealthChecker.Controllers
         public async Task<IActionResult> Index()
         {
             var timedTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            var stopwatch = Stopwatch.StartNew();
             var checkResult = await _healthCheck.CheckHealthAsync(timedTokenSource.Token);
+            ViewBag.ExecutionTime = stopwatch.Elapsed;
             return View(checkResult);
         }
     }
