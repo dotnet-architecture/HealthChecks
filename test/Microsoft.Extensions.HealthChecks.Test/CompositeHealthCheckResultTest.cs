@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.HealthChecks
             var classUnderTest = new CompositeHealthCheckResult();
             classUnderTest.Add("name", HealthCheckResult.Healthy("healthy"));
 
-            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add("name", HealthCheckResult.Healthy("healthy")));
+            Assert.Throws<ArgumentException>(() => classUnderTest.Add("name", HealthCheckResult.Healthy("healthy")));
         }
 
         [Fact]
