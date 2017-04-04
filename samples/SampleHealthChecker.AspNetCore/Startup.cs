@@ -32,12 +32,20 @@ namespace SampleHealthChecker
         {
             services.AddHealthChecks(checks =>
             {
-                checks.WithDefaultCacheDuration(TimeSpan.FromMinutes(1))
-                      .AddUrlCheck("https://github.com")
-                      .AddPrivateMemorySizeCheck(1)
-                      .AddVirtualMemorySizeCheck(2)
-                      .AddWorkingSetCheck(1)
-                      .AddUrlChecks(new List<string> { "https://github.com", "https://google.com", "https://twitddter.com" }, "servers")
+                checks.AddUrlCheck("https://github.com")
+                      .AddHealthCheckGroup(
+                          "servers",
+                          group => group.AddUrlCheck("https://github.com")
+                                        .AddUrlCheck("https://google.com")
+                                        .AddUrlCheck("https://twitddter.com")
+                      )
+                      .AddHealthCheckGroup(
+                          "memory",
+                          group => group.AddPrivateMemorySizeCheck(1)
+                                        .AddVirtualMemorySizeCheck(2)
+                                        .AddWorkingSetCheck(1),
+                          CheckStatus.Unhealthy
+                      )
                       .AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
                       .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); });
 
