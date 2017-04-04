@@ -87,30 +87,31 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 Content = new StringContent("This is the body content")
             };
 
-            [Fact]
-            public async void StatusCode200_ReturnsHealthy()
+            [Theory]
+            [InlineData(HttpStatusCode.OK)]         // 200
+            [InlineData(HttpStatusCode.NoContent)]  // 204
+            public async void StatusCode2xx_ReturnsHealthy(HttpStatusCode statusCode)
             {
-                response.StatusCode = HttpStatusCode.OK;
+                response.StatusCode = statusCode;
 
                 var result = await UrlChecker.DefaultUrlCheck(response);
 
                 Assert.Equal(CheckStatus.Healthy, result.CheckStatus);
-                Assert.Equal("status code OK (200)", result.Description);
+                Assert.Equal($"status code {statusCode} ({(int)statusCode})", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key).Select(kvp => $"'{kvp.Key}' = '{kvp.Value}'"),
                     value => Assert.Equal("'body' = 'This is the body content'", value),
                     value => Assert.Equal("'reason' = 'HTTP reason phrase'", value),
-                    value => Assert.Equal("'status' = '200'", value),
+                    value => Assert.Equal($"'status' = '{(int)statusCode}'", value),
                     value => Assert.Equal("'url' = 'http://uri/'", value)
                 );
             }
 
             [Theory]
             [InlineData(HttpStatusCode.Continue)]            // 1xx
-            [InlineData(HttpStatusCode.NoContent)]           // 2xx
             [InlineData(HttpStatusCode.Moved)]               // 3xx
             [InlineData(HttpStatusCode.NotFound)]            // 4xx
             [InlineData(HttpStatusCode.ServiceUnavailable)]  // 5xx
-            public async void StatusCodeNon200_ReturnsUnhealthy(HttpStatusCode statusCode)
+            public async void StatusCodeNon2xx_ReturnsUnhealthy(HttpStatusCode statusCode)
             {
                 response.StatusCode = statusCode;
 
