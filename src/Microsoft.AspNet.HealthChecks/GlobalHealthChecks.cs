@@ -9,11 +9,9 @@ namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you al
     {
         static GlobalHealthChecks()
         {
-            var logger = new LoggerFactory().CreateLogger<HealthCheckService>();
-
             Builder = new HealthCheckBuilder();
             HandlerCheckTimeout = TimeSpan.FromSeconds(10);
-            Service = new HealthCheckService(Builder, logger);
+            Service = new HealthCheckService(Builder);
         }
 
         public static HealthCheckBuilder Builder { get; }
