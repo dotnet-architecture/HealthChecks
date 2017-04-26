@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using Microsoft.Extensions.HealthChecks.Fakes;
 using Xunit;
 
 namespace Microsoft.Extensions.HealthChecks
@@ -12,28 +11,24 @@ namespace Microsoft.Extensions.HealthChecks
     {
         private HealthCheckBuilder _builder;
         private HealthCheckService _classUnderTest;
-        private FakeLogger<HealthCheckService> _logger;
 
         public HealthCheckServiceTest()
         {
             _builder = new HealthCheckBuilder();
-            _logger = new FakeLogger<HealthCheckService>();
-            _classUnderTest = new HealthCheckService(_builder, _logger);
+            _classUnderTest = new HealthCheckService(_builder);
         }
 
         [Fact]
-        public async void NoChecks_ReturnsUnknownStatus_LogsError()
+        public async void NoChecks_ReturnsUnknownStatus()
         {
             var result = await _classUnderTest.CheckHealthAsync();
 
             Assert.Equal(CheckStatus.Unknown, result.CheckStatus);
             Assert.Empty(result.Results);
-            var operation = Assert.Single(_logger.Operations);
-            Assert.Equal($"Log: level=Error, id=0, exception=(null), message='HealthCheck: No checks have been registered{Environment.NewLine}'", operation);
         }
 
         [Fact]
-        public async void Checks_ReturnsCompositeStatus_LogsCheckInfo()
+        public async void Checks_ReturnsCompositeStatus()
         {
             _builder.AddCheck("c1", HealthCheck.FromCheck(() => HealthCheckResult.Healthy("Healthy check"), TimeSpan.Zero));
             _builder.AddCheck("c2", HealthCheck.FromCheck(() => HealthCheckResult.Unhealthy("Unhealthy check"), TimeSpan.Zero));
@@ -45,10 +40,6 @@ namespace Microsoft.Extensions.HealthChecks
                 item => Assert.Equal("'c1' = 'Healthy (Healthy check)'", item),
                 item => Assert.Equal("'c2' = 'Unhealthy (Unhealthy check)'", item)
             );
-            var operation = Assert.Single(_logger.Operations);
-            Assert.StartsWith("Log: level=Error, id=0, exception=(null), message='", operation);
-            Assert.Contains("HealthCheck: c2 : Unhealthy : Unhealthy check", operation);
-            Assert.Contains("HealthCheck: c1 : Healthy : Healthy check", operation);
         }
     }
 }

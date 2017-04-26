@@ -1,5 +1,7 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 
 namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you also have access to all the helper methods
 {
@@ -7,11 +9,9 @@ namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you al
     {
         static GlobalHealthChecks()
         {
-            var logger = new LoggerFactory().CreateLogger<HealthCheckService>();
-
             Builder = new HealthCheckBuilder();
             HandlerCheckTimeout = TimeSpan.FromSeconds(10);
-            Service = new HealthCheckService(Builder, logger);
+            Service = new HealthCheckService(Builder);
         }
 
         public static HealthCheckBuilder Builder { get; }
