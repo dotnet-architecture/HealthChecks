@@ -2,32 +2,43 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.HealthChecks
 {
-    public abstract class CachedHealthCheck : IHealthCheck
+    public abstract class CachedHealthCheck
     {
-        private DateTimeOffset _cacheExpiration;
+        private static readonly TypeInfo HealthCheckTypeInfo = typeof(IHealthCheck).GetTypeInfo();
+
         private volatile int _writerCount;
 
-        protected CachedHealthCheck(TimeSpan cacheDuration)
+        public CachedHealthCheck(string name, TimeSpan cacheDuration)
         {
-            Guard.ArgumentValid(cacheDuration >= TimeSpan.Zero, nameof(cacheDuration), "Cache duration must either be zero (disabled) or a positive value");
+            Guard.ArgumentNotNullOrEmpty(nameof(name), name);
+            Guard.ArgumentValid(cacheDuration.TotalMilliseconds >= 0, nameof(cacheDuration), "Cache duration must be zero (disabled) or greater than zero.");
 
+            Name = name;
             CacheDuration = cacheDuration;
         }
 
-        protected IHealthCheckResult CachedResult { get; private set; }
+        public IHealthCheckResult CachedResult { get; internal set; }
 
-        public virtual TimeSpan CacheDuration { get; }
+        public TimeSpan CacheDuration { get; }
+
+        public DateTimeOffset CacheExpiration { get; internal set; }
+
+        public string Name { get; }
 
         protected virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
-        public async ValueTask<IHealthCheckResult> CheckAsync(CancellationToken cancellationToken)
+        protected abstract IHealthCheck Resolve(IServiceProvider serviceProvider);
+
+        public async ValueTask<IHealthCheckResult> RunAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default(CancellationToken))
         {
-            while (_cacheExpiration <= UtcNow)
+            while (CacheExpiration <= UtcNow)
             {
                 // Can't use a standard lock here because of async, so we'll use this flag to determine when we should write a value,
                 // and the waiters who aren't allowed to write will just spin wait for the new value.
@@ -37,8 +48,21 @@ namespace Microsoft.Extensions.HealthChecks
                     continue;
                 }
 
-                CachedResult = await CheckExecutor.RunCheckAsync(ExecuteCheckAsync, cancellationToken);
-                _cacheExpiration = UtcNow + CacheDuration;
+                try
+                {
+                    var check = Resolve(serviceProvider);
+                    CachedResult = await check.CheckAsync(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    CachedResult = HealthCheckResult.Unhealthy("The health check operation timed out");
+                }
+                catch (Exception ex)
+                {
+                    CachedResult = HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}");
+                }
+
+                CacheExpiration = UtcNow + CacheDuration;
                 _writerCount = 0;
                 break;
             }
@@ -46,13 +70,40 @@ namespace Microsoft.Extensions.HealthChecks
             return CachedResult;
         }
 
-        /// <summary>
-        /// Override to provide the health check implementation. The results will
-        /// automatically be cached based on <see cref="CacheDuration"/>, and if
-        /// needed, the previously cached value is available via <see cref="CachedResult"/>.
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        protected abstract ValueTask<IHealthCheckResult> ExecuteCheckAsync(CancellationToken cancellationToken);
+        public static CachedHealthCheck FromHealthCheck(string name, TimeSpan cacheDuration, IHealthCheck healthCheck)
+        {
+            Guard.ArgumentNotNull(nameof(healthCheck), healthCheck);
+
+            return new TypeOrHealthCheck_HealthCheck(name, cacheDuration, healthCheck);
+        }
+
+        public static CachedHealthCheck FromType(string name, TimeSpan cacheDuration, Type healthCheckType)
+        {
+            Guard.ArgumentNotNull(nameof(healthCheckType), healthCheckType);
+            Guard.ArgumentValid(HealthCheckTypeInfo.IsAssignableFrom(healthCheckType.GetTypeInfo()), nameof(healthCheckType), $"Health check must implement '{typeof(IHealthCheck).FullName}'.");
+
+            return new TypeOrHealthCheck_Type(name, cacheDuration, healthCheckType);
+        }
+
+        class TypeOrHealthCheck_HealthCheck : CachedHealthCheck
+        {
+            private readonly IHealthCheck _healthCheck;
+
+            public TypeOrHealthCheck_HealthCheck(string name, TimeSpan cacheDuration, IHealthCheck healthCheck) : base(name, cacheDuration)
+                => _healthCheck = healthCheck;
+
+            protected override IHealthCheck Resolve(IServiceProvider serviceProvider) => _healthCheck;
+        }
+
+        class TypeOrHealthCheck_Type : CachedHealthCheck
+        {
+            private readonly Type _healthCheckType;
+
+            public TypeOrHealthCheck_Type(string name, TimeSpan cacheDuration, Type healthCheckType) : base(name, cacheDuration)
+                => _healthCheckType = healthCheckType;
+
+            protected override IHealthCheck Resolve(IServiceProvider serviceProvider)
+                => (IHealthCheck)serviceProvider.GetRequiredService(_healthCheckType);
+        }
     }
 }

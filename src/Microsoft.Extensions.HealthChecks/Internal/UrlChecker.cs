@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         public UrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc, string url)
         {
             Guard.ArgumentNotNull(nameof(checkFunc), checkFunc);
-            Guard.ArgumentNotNullOrWhitespace(nameof(url), url);
+            Guard.ArgumentNotNullOrEmpty(nameof(url), url);
 
             _checkFunc = checkFunc;
             _url = url;

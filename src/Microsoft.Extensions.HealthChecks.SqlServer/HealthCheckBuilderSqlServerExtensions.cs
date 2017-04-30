@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.HealthChecks
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return HealthCheckResult.Unhealthy($"SqlCheck({name}): Exception during check: {ex.GetType().FullName}");
                 }

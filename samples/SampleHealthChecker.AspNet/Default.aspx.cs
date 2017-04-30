@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI;
+using Microsoft.AspNet.HealthChecks;
 using Microsoft.Extensions.HealthChecks;
 
 namespace SampleHealthChecker.AspNet
@@ -22,7 +23,7 @@ namespace SampleHealthChecker.AspNet
 
         private async Task GetChecksAsync(CancellationToken cancellationToken)
         {
-            var timedTokenSource = new CancellationTokenSource(GlobalHealthChecks.HandlerCheckTimeout);
+            var timedTokenSource = new CancellationTokenSource(HealthCheckHandler.Timeout);
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timedTokenSource.Token);
 
             var stopwatch = Stopwatch.StartNew();

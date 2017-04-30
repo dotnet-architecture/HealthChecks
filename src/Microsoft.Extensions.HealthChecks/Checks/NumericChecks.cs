@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.HealthChecks
             where T : IComparable<T>
         {
             Guard.ArgumentNotNull(nameof(builder), builder);
-            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
+            Guard.ArgumentNotNullOrEmpty(nameof(name), name);
             Guard.ArgumentNotNull(nameof(currentValueFunc), currentValueFunc);
 
             builder.AddCheck(name, () =>
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.HealthChecks
             where T : IComparable<T>
         {
             Guard.ArgumentNotNull(nameof(builder), builder);
-            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
+            Guard.ArgumentNotNullOrEmpty(nameof(name), name);
             Guard.ArgumentNotNull(nameof(currentValueFunc), currentValueFunc);
 
             builder.AddCheck(name, () =>

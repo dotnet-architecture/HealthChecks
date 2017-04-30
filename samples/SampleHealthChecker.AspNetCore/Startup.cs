@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,13 +29,15 @@ namespace SampleHealthChecker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // When doing DI'd health checks, you must register them as services of their concrete type
+            services.AddSingleton<CustomHealthCheck>();
+
             services.AddHealthChecks(checks =>
             {
                 checks.AddUrlCheck("https://github.com")
                       .AddHealthCheckGroup(
                           "servers",
-                          group => group.AddUrlCheck("https://github.com")
-                                        .AddUrlCheck("https://google.com")
+                          group => group.AddUrlCheck("https://google.com")
                                         .AddUrlCheck("https://twitddter.com")
                       )
                       .AddHealthCheckGroup(
@@ -47,7 +48,8 @@ namespace SampleHealthChecker
                           CheckStatus.Unhealthy
                       )
                       .AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
-                      .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); });
+                      .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
+                      .AddCheck<CustomHealthCheck>("custom");
 
                 /*
                 // add valid storage account credentials first
