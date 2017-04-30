@@ -3,13 +3,15 @@
 
 using System;
 using System.Linq;
+using Microsoft.Extensions.HealthChecks.Fakes;
 using Xunit;
 
 namespace Microsoft.Extensions.HealthChecks.Checks
 {
     public class NumericChecksTest
     {
-        HealthCheckBuilder builder = new HealthCheckBuilder();
+        private readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
+        private readonly IServiceProvider _serviceProvider = new FakeServiceProvider();
 
         public class AddMinValueCheck : NumericChecksTest
         {
@@ -17,9 +19,9 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             public void GuardClauses()
             {
                 Assert.Throws<ArgumentNullException>("builder", () => HealthCheckBuilderExtensions.AddMinValueCheck(null, "name", 42, () => 2112));
-                Assert.Throws<ArgumentNullException>("name", () => HealthCheckBuilderExtensions.AddMinValueCheck(builder, null, 42, () => 2112));
-                Assert.Throws<ArgumentException>("name", () => HealthCheckBuilderExtensions.AddMinValueCheck(builder, " ", 42, () => 2112));
-                Assert.Throws<ArgumentNullException>("currentValueFunc", () => HealthCheckBuilderExtensions.AddMinValueCheck(builder, "name", 42, null));
+                Assert.Throws<ArgumentNullException>("name", () => HealthCheckBuilderExtensions.AddMinValueCheck(_builder, null, 42, () => 2112));
+                Assert.Throws<ArgumentException>("name", () => HealthCheckBuilderExtensions.AddMinValueCheck(_builder, "", 42, () => 2112));
+                Assert.Throws<ArgumentNullException>("currentValueFunc", () => HealthCheckBuilderExtensions.AddMinValueCheck(_builder, "name", 42, null));
             }
 
             [Theory]
@@ -27,11 +29,11 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             [InlineData(1, CheckStatus.Healthy)]
             public async void RegistersCheck(int monitoredValue, CheckStatus expectedStatus)
             {
-                builder.AddMinValueCheck("CheckName", 0, () => monitoredValue);
+                _builder.AddMinValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.Checks["CheckName"];
+                var check = _builder.ChecksByName["CheckName"];
 
-                var result = await check.CheckAsync();
+                var result = await check.RunAsync(_serviceProvider);
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"min=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),
@@ -55,9 +57,9 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             public void GuardClauses()
             {
                 Assert.Throws<ArgumentNullException>("builder", () => HealthCheckBuilderExtensions.AddMaxValueCheck(null, "name", 42, () => 2112));
-                Assert.Throws<ArgumentNullException>("name", () => HealthCheckBuilderExtensions.AddMaxValueCheck(builder, null, 42, () => 2112));
-                Assert.Throws<ArgumentException>("name", () => HealthCheckBuilderExtensions.AddMaxValueCheck(builder, " ", 42, () => 2112));
-                Assert.Throws<ArgumentNullException>("currentValueFunc", () => HealthCheckBuilderExtensions.AddMaxValueCheck(builder, "name", 42, null));
+                Assert.Throws<ArgumentNullException>("name", () => HealthCheckBuilderExtensions.AddMaxValueCheck(_builder, null, 42, () => 2112));
+                Assert.Throws<ArgumentException>("name", () => HealthCheckBuilderExtensions.AddMaxValueCheck(_builder, "", 42, () => 2112));
+                Assert.Throws<ArgumentNullException>("currentValueFunc", () => HealthCheckBuilderExtensions.AddMaxValueCheck(_builder, "name", 42, null));
             }
 
             [Theory]
@@ -65,11 +67,11 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             [InlineData(-1, CheckStatus.Healthy)]
             public async void RegistersCheck(int monitoredValue, CheckStatus expectedStatus)
             {
-                builder.AddMaxValueCheck("CheckName", 0, () => monitoredValue);
+                _builder.AddMaxValueCheck("CheckName", 0, () => monitoredValue);
 
-                var check = builder.Checks["CheckName"];
+                var check = _builder.ChecksByName["CheckName"];
 
-                var result = await check.CheckAsync();
+                var result = await check.RunAsync(_serviceProvider);
                 Assert.Equal(expectedStatus, result.CheckStatus);
                 Assert.Equal($"max=0, current={monitoredValue}", result.Description);
                 Assert.Collection(result.Data.OrderBy(kvp => kvp.Key),

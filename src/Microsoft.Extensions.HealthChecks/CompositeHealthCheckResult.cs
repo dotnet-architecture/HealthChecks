@@ -30,11 +30,17 @@ namespace Microsoft.Extensions.HealthChecks
             {
                 var checkStatuses = new HashSet<CheckStatus>(_results.Select(x => x.Value.CheckStatus));
                 if (checkStatuses.Count == 0)
+                {
                     return _initialStatus;
+                }
                 if (checkStatuses.Count == 1)
+                {
                     return checkStatuses.First();
+                }
                 if (checkStatuses.Contains(CheckStatus.Healthy))
+                {
                     return _partiallyHealthyStatus;
+                }
 
                 return CheckStatus.Unhealthy;
             }
@@ -62,16 +68,16 @@ namespace Microsoft.Extensions.HealthChecks
 
         public void Add(string name, CheckStatus status, string description, Dictionary<string, object> data)
         {
-            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
-            Guard.ArgumentValid(status != CheckStatus.Unknown, nameof(status), "Cannot add unknown status to composite health check result");
-            Guard.ArgumentNotNullOrWhitespace(nameof(description), description);
+            Guard.ArgumentNotNullOrEmpty(nameof(name), name);
+            Guard.ArgumentValid(status != CheckStatus.Unknown, nameof(status), "Cannot add 'Unknown' status to composite health check result.");
+            Guard.ArgumentNotNullOrEmpty(nameof(description), description);
 
             _results.Add(name, HealthCheckResult.FromStatus(status, description, data));
         }
 
         public void Add(string name, IHealthCheckResult checkResult)
         {
-            Guard.ArgumentNotNullOrWhitespace(nameof(name), name);
+            Guard.ArgumentNotNullOrEmpty(nameof(name), name);
             Guard.ArgumentNotNull(nameof(checkResult), checkResult);
 
             _results.Add(name, checkResult);

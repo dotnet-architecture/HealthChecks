@@ -16,8 +16,8 @@ namespace Microsoft.AspNetCore.Hosting
 
         public static IWebHostBuilder UseHealthChecks(this IWebHostBuilder builder, int port, TimeSpan timeout)
         {
-            Guard.ArgumentValid(port > 0 && port < 65536, nameof(port), "Port must be a value between 1 and 65535");
-            Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span");
+            Guard.ArgumentValid(port > 0 && port < 65536, nameof(port), "Port must be a value between 1 and 65535.");
+            Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span.");
 
             builder.ConfigureServices(services =>
             {
@@ -36,9 +36,9 @@ namespace Microsoft.AspNetCore.Hosting
         {
             Guard.ArgumentNotNull(nameof(path), path);
             // REVIEW: Is there a better URL path validator somewhere?
-            Guard.ArgumentValid(!path.Contains("?"), nameof(path), "Path cannot contain query string values");
-            Guard.ArgumentValid(path.StartsWith("/"), nameof(path), "Path should start with /");
-            Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span");
+            Guard.ArgumentValid(!path.Contains("?"), nameof(path), "Path cannot contain query string values.");
+            Guard.ArgumentValid(path.StartsWith("/"), nameof(path), "Path should start with '/'.");
+            Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span.");
 
             builder.ConfigureServices(services => services.AddSingleton<IStartupFilter>(new HealthCheckStartupFilter(path, timeout)));
             return builder;

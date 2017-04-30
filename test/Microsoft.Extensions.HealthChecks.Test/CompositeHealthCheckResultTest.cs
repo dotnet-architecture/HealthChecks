@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.HealthChecks
     public class CompositeHealthCheckResultTest
     {
         public static List<object[]> AllLegalStatuses = Enum.GetValues(typeof(CheckStatus)).Cast<object>().Select(x => new[] { x }).ToList();
-        public static List<object[]> AllLegalStatusesForAdd = Enum.GetValues(typeof(CheckStatus)).Cast<CheckStatus>().Where(x => x != CheckStatus.Unknown).Select(x => new object[] { x }).ToList();
+        public static List<object[]> AllLegalStatusesExceptUnknown = Enum.GetValues(typeof(CheckStatus)).Cast<CheckStatus>().Where(x => x != CheckStatus.Unknown).Select(x => new object[] { x }).ToList();
 
         [Fact]
         public void GuardClauses()
@@ -20,15 +20,15 @@ namespace Microsoft.Extensions.HealthChecks
 
             // Add(string, CheckStatus, string)
             Assert.Throws<ArgumentNullException>("name", () => classUnderTest.Add(null, CheckStatus.Healthy, "?"));
-            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add(" ", CheckStatus.Healthy, "?"));
+            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add("", CheckStatus.Healthy, "?"));
             Assert.Throws<ArgumentException>("status", () => classUnderTest.Add("name", CheckStatus.Unknown, "?"));
             Assert.Throws<ArgumentNullException>("description", () => classUnderTest.Add("name", CheckStatus.Healthy, null));
-            Assert.Throws<ArgumentException>("description", () => classUnderTest.Add("name", CheckStatus.Unhealthy, " "));
+            Assert.Throws<ArgumentException>("description", () => classUnderTest.Add("name", CheckStatus.Unhealthy, ""));
 
             // Add(string, IHealthCheckResult)
             var checkResult = HealthCheckResult.Healthy("Hello");
             Assert.Throws<ArgumentNullException>("name", () => classUnderTest.Add(null, checkResult));
-            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add(" ", checkResult));
+            Assert.Throws<ArgumentException>("name", () => classUnderTest.Add("", checkResult));
             Assert.Throws<ArgumentNullException>("checkResult", () => classUnderTest.Add("name", null));
         }
 
@@ -85,7 +85,7 @@ namespace Microsoft.Extensions.HealthChecks
         }
 
         [Theory]
-        [MemberData(nameof(AllLegalStatusesForAdd))]
+        [MemberData(nameof(AllLegalStatusesExceptUnknown))]
         public void SingleValue_CheckStatusIsSetStatus_DescriptionIsDescription(CheckStatus status)
         {
             var classUnderTest = new CompositeHealthCheckResult();
@@ -98,7 +98,7 @@ namespace Microsoft.Extensions.HealthChecks
         }
 
         [Theory]
-        [MemberData(nameof(AllLegalStatusesForAdd))]
+        [MemberData(nameof(AllLegalStatusesExceptUnknown))]
         public void MultipleValuesOfSameStatus_CheckStatusIsStatus_DescriptionIsComposite(CheckStatus status)
         {
             var classUnderTest = new CompositeHealthCheckResult();

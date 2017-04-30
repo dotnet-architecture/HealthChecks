@@ -30,9 +30,13 @@ namespace Microsoft.AspNetCore.HealthChecks
             return app =>
             {
                 if (_port.HasValue)
+                {
                     app.UseMiddleware<HealthCheckMiddleware>(_port, _timeout);
+                }
                 else
+                {
                     app.UseMiddleware<HealthCheckMiddleware>(_path, _timeout);
+                }
 
                 next(app);
             };

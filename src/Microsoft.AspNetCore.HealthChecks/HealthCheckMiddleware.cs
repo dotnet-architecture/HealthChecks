@@ -66,7 +66,9 @@ namespace Microsoft.AspNetCore.HealthChecks
             }
 
             if (context.Request.Path == _path)
+            {
                 return true;
+            }
 
             return false;
         }

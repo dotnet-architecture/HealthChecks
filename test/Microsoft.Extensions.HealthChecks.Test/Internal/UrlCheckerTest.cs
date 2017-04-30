@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
             Assert.Throws<ArgumentNullException>("checkFunc", () => new UrlChecker(null, "https://url"));
             Assert.Throws<ArgumentNullException>("url", () => new UrlChecker(checkFunc, null));
-            Assert.Throws<ArgumentException>("url", () => new UrlChecker(checkFunc, " "));
+            Assert.Throws<ArgumentException>("url", () => new UrlChecker(checkFunc, ""));
         }
 
         public class CheckAsync

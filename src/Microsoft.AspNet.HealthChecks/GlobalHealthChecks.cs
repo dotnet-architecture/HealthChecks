@@ -2,29 +2,44 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you also have access to all the helper methods
 {
-    public class GlobalHealthChecks
+    public static class GlobalHealthChecks
     {
-        static GlobalHealthChecks()
+        private static IHealthCheckService _service;
+
+        public static IHealthCheckService Service
         {
-            Builder = new HealthCheckBuilder();
-            HandlerCheckTimeout = TimeSpan.FromSeconds(10);
-            Service = new HealthCheckService(Builder);
+            get
+            {
+                Guard.OperationValid(_service != null, "You must call Build before retrieving the service.");
+
+                return _service;
+            }
         }
 
-        public static HealthCheckBuilder Builder { get; }
+        public static void Build(Action<HealthCheckBuilder> buildout)
+            => Build(buildout, null, null);
 
-        public static TimeSpan HandlerCheckTimeout { get; private set; }
+        public static void Build(Action<HealthCheckBuilder> buildout, IServiceProvider serviceProvider)
+            => Build(buildout, serviceProvider, null);
 
-        public static IHealthCheckService Service { get; }
-
-        public static void SetHandlerCheckTimeout(TimeSpan timeout)
+        public static void Build(Action<HealthCheckBuilder> buildout, IServiceProvider serviceProvider, IServiceScopeFactory serviceScopeFactory)
         {
-            Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span");
+            Guard.ArgumentNotNull(nameof(buildout), buildout);
+            Guard.OperationValid(_service == null, "You may only call Build once.");
 
-            HandlerCheckTimeout = timeout;
+            var builder = new HealthCheckBuilder();
+            buildout(builder);
+
+            _service = new HealthCheckService(builder, serviceProvider ?? new NoOpServiceProvider(), serviceScopeFactory);
+        }
+
+        class NoOpServiceProvider : IServiceProvider
+        {
+            public object GetService(Type serviceType) => null;
         }
     }
 }

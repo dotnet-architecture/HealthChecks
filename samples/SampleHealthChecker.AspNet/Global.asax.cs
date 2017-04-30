@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.HealthChecks;
 using Microsoft.Extensions.HealthChecks;
 
 namespace SampleHealthChecker.AspNet
@@ -11,24 +12,25 @@ namespace SampleHealthChecker.AspNet
     {
         protected void Application_Start(object sender, EventArgs e)
         {
-            GlobalHealthChecks.SetHandlerCheckTimeout(TimeSpan.FromSeconds(3));
-            GlobalHealthChecks.Builder
-                .WithDefaultCacheDuration(TimeSpan.FromMinutes(1))
-                .AddUrlCheck("https://github.com")
-                .AddHealthCheckGroup(
-                    "servers",
-                    group => group.AddUrlCheck("https://github.com")
-                                  .AddUrlCheck("https://google.com")
-                                  .AddUrlCheck("https://twitddter.com")
-                )
-                .AddHealthCheckGroup(
-                    "memory",
-                    group => group.AddPrivateMemorySizeCheck(1)
-                                  .AddVirtualMemorySizeCheck(2)
-                                  .AddWorkingSetCheck(1)
-                )
-                .AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
-                .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); });
+            HealthCheckHandler.Timeout = TimeSpan.FromSeconds(3);
+
+            GlobalHealthChecks.Build(builder =>
+                builder.WithDefaultCacheDuration(TimeSpan.FromMinutes(1))
+                       .AddUrlCheck("https://github.com")
+                       .AddHealthCheckGroup(
+                           "servers",
+                           group => group.AddUrlCheck("https://google.com")
+                                         .AddUrlCheck("https://twitddter.com")
+                       )
+                       .AddHealthCheckGroup(
+                           "memory",
+                           group => group.AddPrivateMemorySizeCheck(1)
+                                         .AddVirtualMemorySizeCheck(2)
+                                         .AddWorkingSetCheck(1)
+                       )
+                       .AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
+                       .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
+            );
         }
     }
 }
