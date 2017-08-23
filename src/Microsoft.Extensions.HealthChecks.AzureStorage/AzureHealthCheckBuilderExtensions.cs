@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.HealthChecks
 
                     var properties = await tableClient.GetServicePropertiesAsync().ConfigureAwait(false);
 
-                    if (String.IsNullOrWhiteSpace(tableName))
+                    if (!String.IsNullOrWhiteSpace(tableName))
                     {
                         var table = tableClient.GetTableReference(tableName);
 
