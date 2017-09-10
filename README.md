@@ -3,13 +3,13 @@ Health checks for building services  [![Build status](https://ci.appveyor.com/ap
 
 This project is part of ASP.NET Core. You can find samples, documentation and getting started instructions for ASP.NET Core at the [Home](https://github.com/aspnet/home) repo.
 
-Project | NuGet| Used For 
---------------- | --------------- 
-Microsoft.AspNet.HealthChecks|[![NuGet downloads Microsoft.AspNet.HealthChecks](https://img.shields.io/nuget/dt/Microsoft.AspNet.HealthChecks.svg)](https://www.nuget.org/packages/Microsoft.AspNet.HealthChecks) | AspNet
-Microsoft.AspNetCore.HealthChecks|[![NuGet downloads Microsoft.AspNetCore.HealthChecks](https://img.shields.io/nuget/dt/Microsoft.AspNetCore.HealthChecks.svg)](https://www.nuget.org/packages/Microsoft.AspNetCore.HealthChecks) | AspNetCore
-Microsoft.Extensions.HealthChecks|[![NuGet downloads Microsoft.Extensions.HealthChecks](https://img.shields.io/nuget/dt/Microsoft.Extensions.HealthChecks.svg)](https://www.nuget.org/packages/Microsoft.Extensions.HealthChecks) | AspNetCore
-Microsoft.Extensions.HealthChecks.AzureStorage|[![NuGet downloads Microsoft.Extensions.HealthChecks.AzureStorage](https://img.shields.io/nuget/dt/Microsoft.Extensions.HealthChecks.AzureStorage.svg)](https://www.nuget.org/packages/Microsoft.Extensions.HealthChecks.AzureStorage) | AspNetCore
-Microsoft.Extensions.HealthChecks.SqlServer|[![NuGet downloads Microsoft.Extensions.HealthChecks.SqlServer](https://img.shields.io/nuget/dt/Microsoft.Extensions.HealthChecks.SqlServer.svg)](https://www.nuget.org/packages/Microsoft.Extensions.HealthChecks.SqlServer) | AspNetCore
+Project | NuGet | Used For 
+--------------- | --------------- | ---------------
+Microsoft.AspNet.HealthChecks|[![NuGet downloads Microsoft.AspNet.HealthChecks](https://img.shields.io/nuget/dt/Microsoft.AspNet.HealthChecks.svg)](https://www.nuget.org/packages/Microsoft.AspNet.HealthChecks)|AspNet
+Microsoft.AspNetCore.HealthChecks|[![NuGet downloads Microsoft.AspNetCore.HealthChecks](https://img.shields.io/nuget/dt/Microsoft.AspNetCore.HealthChecks.svg)](https://www.nuget.org/packages/Microsoft.AspNetCore.HealthChecks)|AspNetCore
+Microsoft.Extensions.HealthChecks|[![NuGet downloads Microsoft.Extensions.HealthChecks](https://img.shields.io/nuget/dt/Microsoft.Extensions.HealthChecks.svg)](https://www.nuget.org/packages/Microsoft.Extensions.HealthChecks)|AspNetCore
+Microsoft.Extensions.HealthChecks.AzureStorage|[![NuGet downloads Microsoft.Extensions.HealthChecks.AzureStorage](https://img.shields.io/nuget/dt/Microsoft.Extensions.HealthChecks.AzureStorage.svg)](https://www.nuget.org/packages/Microsoft.Extensions.HealthChecks.AzureStorage)|AspNetCore
+Microsoft.Extensions.HealthChecks.SqlServer|[![NuGet downloads Microsoft.Extensions.HealthChecks.SqlServer](https://img.shields.io/nuget/dt/Microsoft.Extensions.HealthChecks.SqlServer.svg)](https://www.nuget.org/packages/Microsoft.Extensions.HealthChecks.SqlServer)|AspNetCore
 
 #### for your AspNet Project
 ```
@@ -71,7 +71,7 @@ Install-Package Microsoft.AspNetCore.HealthChecks
     }
 ```
 
-###  Group¡¢Custom health check
+###  GroupÂ¡Â¢Custom health check
 ```
 Install-Package Microsoft.Extensions.HealthChecks
 ```
