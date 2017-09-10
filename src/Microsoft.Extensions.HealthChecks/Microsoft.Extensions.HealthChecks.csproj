@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/seven1986/HealthChecks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/seven1986/HealthChecks</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
