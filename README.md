@@ -71,7 +71,7 @@ Install-Package Microsoft.AspNetCore.HealthChecks
     }
 ```
 
-###  Group¡¢Custom health check
+###  Group,Custom health check
 ```
 Install-Package Microsoft.Extensions.HealthChecks
 ```
