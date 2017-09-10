@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
+    <PackageProjectUrl>https://github.com/seven1986/HealthChecks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/seven1986/HealthChecks</RepositoryUrl>
+    <Description>HealthChecks For AspNetCore WebApplication</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
