@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.HealthChecks;
-using Pomelo.Data.MySql;
+﻿using MySql.Data.MySqlClient;
 using System;
 
 namespace Microsoft.Extensions.HealthChecks
@@ -24,8 +23,8 @@ namespace Microsoft.Extensions.HealthChecks
                         connection.Open();
                         using (var cmd = new MySqlCommand("SHOW STATUS", connection))
                         {
-                            var result = await cmd.ExecuteScalarAsync();
-                            if(result != null)
+                            var result = await cmd.ExecuteReaderAsync();
+                            if(result.HasRows)
                             {
                                 return HealthCheckResult.Healthy($"MySqlCheck({name}): Healthy");
                             }

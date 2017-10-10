@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Pomelo.Data.MySql" Version="1.0.0" />
+      <PackageReference Include="MySqlConnector" Version="0.28.0" />
     </ItemGroup>
 
     <ItemGroup>
