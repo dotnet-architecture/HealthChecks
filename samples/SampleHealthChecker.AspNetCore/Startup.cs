@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.HealthChecks;
 using Microsoft.Extensions.Logging;
+using Couchbase;
 
 namespace SampleHealthChecker
 {
@@ -31,7 +32,7 @@ namespace SampleHealthChecker
         {
             // When doing DI'd health checks, you must register them as services of their concrete type
             services.AddSingleton<CustomHealthCheck>();
-
+            
             services.AddHealthChecks(checks =>
             {
                 checks.AddUrlCheck("https://github.com")
@@ -51,6 +52,9 @@ namespace SampleHealthChecker
                       .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
                       .AddCheck<CustomHealthCheck>("custom");
 
+                ClusterHelper.Initialize();
+
+                checks.AddCouchbaseCheck(Configuration.GetValue<string>("COUCHBASE_CLUSTER_USER"), Configuration.GetValue<string>("COUCHBASE_CLUSTER_PASSWORD"), TimeSpan.FromSeconds(10));
                 /*
                 // add valid storage account credentials first
                 checks.AddAzureBlobStorageCheck("accountName", "accountKey");
@@ -86,7 +90,7 @@ namespace SampleHealthChecker
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
+            
             app.UseStaticFiles();
 
             app.UseMvc(routes =>
