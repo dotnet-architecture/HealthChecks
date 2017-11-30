@@ -10,6 +10,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Couchbase;
+using StackExchange.Redis;
+using Nest;
+using System.Linq;
+using Elasticsearch.Net;
+using Couchbase.Core;
+using Couchbase.Management;
 
 namespace SampleHealthChecker
 {
@@ -32,7 +38,11 @@ namespace SampleHealthChecker
         {
             // When doing DI'd health checks, you must register them as services of their concrete type
             services.AddSingleton<CustomHealthCheck>();
-            
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("REDIS_CLUSTER_SERVERS")));
+
+            RegisterCouchbase(services);
+            RegisterElastic(services);
+
             services.AddHealthChecks(checks =>
             {
                 checks.AddUrlCheck("https://github.com")
@@ -52,9 +62,12 @@ namespace SampleHealthChecker
                       .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
                       .AddCheck<CustomHealthCheck>("custom");
 
-                ClusterHelper.Initialize();
+               
 
-                checks.AddCouchbaseCheck(Configuration.GetValue<string>("COUCHBASE_CLUSTER_USER"), Configuration.GetValue<string>("COUCHBASE_CLUSTER_PASSWORD"), TimeSpan.FromSeconds(10));
+                checks.AddCouchbaseCheck(services,TimeSpan.FromSeconds(10));
+                checks.AddRedisCheck(services, TimeSpan.FromSeconds(10));
+                checks.AddElasticCheck(services, TimeSpan.FromSeconds(10));
+
                 /*
                 // add valid storage account credentials first
                 checks.AddAzureBlobStorageCheck("accountName", "accountKey");
@@ -74,6 +87,45 @@ namespace SampleHealthChecker
 
             services.AddMvc();
         }
+
+        private void RegisterElastic(IServiceCollection services)
+        {
+            var nodes = new Uri[] { };
+
+            if (Configuration != null)
+            {
+                var servers = Configuration.GetValue<string>("ELASTIC_CLUSTER_SERVERS");
+                if (!string.IsNullOrEmpty(servers))
+                {
+                    nodes = (from u in servers.Split(',').ToList()
+                              where Uri.IsWellFormedUriString(u, UriKind.RelativeOrAbsolute)
+                              select new Uri(u)).ToArray();
+                }
+            }
+
+            if (!nodes.Any())
+            {
+                return;
+            }
+
+            var pool = new StaticConnectionPool(nodes);
+            var settings = new ConnectionSettings(pool);
+            var client = new ElasticClient(settings);
+
+            services.AddSingleton<IElasticClient>(client);
+        }
+
+        private void RegisterCouchbase(IServiceCollection services)
+        {
+            ClusterHelper.Initialize();
+
+            var username = Configuration.GetValue<string>("COUCHBASE_CLUSTER_USER");
+            var password = Configuration.GetValue<string>("COUCHBASE_CLUSTER_PASSWORD");
+
+            services.AddSingleton<ICluster>(ClusterHelper.Get());
+            services.AddSingleton<IClusterManager>(p => p.GetService<ICluster>().CreateManager(username, password));
+        }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

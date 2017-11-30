@@ -8,6 +8,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.HealthChecks\Microsoft.AspNetCore.HealthChecks.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.Extensions.HealthChecks.Couchbase\Microsoft.Extensions.HealthChecks.Couchbase.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.HealthChecks.Elastic\Microsoft.Extensions.HealthChecks.Elastic.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.HealthChecks.Redis\Microsoft.Extensions.HealthChecks.Redis.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.Extensions.HealthChecks\Microsoft.Extensions.HealthChecks.csproj" />
   </ItemGroup>
 
