@@ -38,10 +38,10 @@ namespace SampleHealthChecker
         {
             // When doing DI'd health checks, you must register them as services of their concrete type
             services.AddSingleton<CustomHealthCheck>();
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("REDIS_CLUSTER_SERVERS")));
+            //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("REDIS_CLUSTER_SERVERS")));
 
-            RegisterCouchbase(services);
-            RegisterElastic(services);
+            //RegisterCouchbase(services);
+            //RegisterElastic(services);
 
             services.AddHealthChecks(checks =>
             {
@@ -64,9 +64,9 @@ namespace SampleHealthChecker
 
                
 
-                checks.AddCouchbaseCheck(services,TimeSpan.FromSeconds(10));
-                checks.AddRedisCheck(services, TimeSpan.FromSeconds(10));
-                checks.AddElasticCheck(services, TimeSpan.FromSeconds(10));
+                //checks.AddCouchbaseCheck(services,TimeSpan.FromSeconds(10));
+                //checks.AddRedisCheck(services, TimeSpan.FromSeconds(10));
+                //checks.AddElasticCheck(services, TimeSpan.FromSeconds(10));
 
                 /*
                 // add valid storage account credentials first
