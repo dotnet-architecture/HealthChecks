@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 15.0.26228.4
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E05DCF88-F916-4B61-A5DC-A8344C9E2429}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNet.HealthChecks", "src\Microsoft.AspNet.HealthChecks\Microsoft.AspNet.HealthChecks.csproj", "{2AE82E1C-6CE1-4755-A332-FA359B7CCE72}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleHealthChecker.AspNet", "samples\SampleHealthChecker.AspNet\SampleHealthChecker.AspNet.csproj", "{33FB5967-62C7-4230-B515-780EF63F748E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Extensions.HealthChecks.PostgreSql", "src\Microsoft.Extensions.HealthChecks.PostgreSql\Microsoft.Extensions.HealthChecks.PostgreSql.csproj", "{207D3914-5E0D-4970-BB5F-0ED5E08A11D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{33FB5967-62C7-4230-B515-780EF63F748E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33FB5967-62C7-4230-B515-780EF63F748E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33FB5967-62C7-4230-B515-780EF63F748E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{207D3914-5E0D-4970-BB5F-0ED5E08A11D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{207D3914-5E0D-4970-BB5F-0ED5E08A11D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{207D3914-5E0D-4970-BB5F-0ED5E08A11D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{207D3914-5E0D-4970-BB5F-0ED5E08A11D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,5 +82,9 @@ Global
 		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
 		{2AE82E1C-6CE1-4755-A332-FA359B7CCE72} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
 		{33FB5967-62C7-4230-B515-780EF63F748E} = {E05DCF88-F916-4B61-A5DC-A8344C9E2429}
+		{207D3914-5E0D-4970-BB5F-0ED5E08A11D0} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AB38C3CE-2846-4064-A914-D776DFC8F1E0}
 	EndGlobalSection
 EndGlobal
