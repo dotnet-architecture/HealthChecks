@@ -8,10 +8,7 @@ namespace Microsoft.Extensions.HealthChecks.PostgreSql
     {
         public static HealthCheckBuilder AddPostgreSqlCheck(this HealthCheckBuilder builder, string name, string connectionString)
         {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
+            Guard.ArgumentNotNull(nameof(builder), builder);
 
             return AddPostgreSqlCheck(builder, name, connectionString, builder.DefaultCacheDuration);
         }
