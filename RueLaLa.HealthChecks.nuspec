@@ -47,9 +47,9 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="src/Microsoft.AspNetCore.HealthChecks/bin/Release/**" target="lib" />
         <file src="src/Microsoft.Extensions.HealthChecks/bin/Release/**" target="lib" />
-        <file src="src/Microsoft.Extensions.HealthChecks.SqlServer/bin/Release/**" target="lib" />
+        <file src="src/Microsoft.AspNetCore.HealthChecks/bin/Release/**" target="lib" exclude="**/Microsoft.Extensions.HealthChecks.dll;**/Microsoft.Extensions.HealthChecks.pdb"/>
+        <file src="src/Microsoft.Extensions.HealthChecks.SqlServer/bin/Release/**" target="lib" exclude="**/Microsoft.Extensions.HealthChecks.dll;**/Microsoft.Extensions.HealthChecks.pdb"/>
     </files>
 
 </package>
