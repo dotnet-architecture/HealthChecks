@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata>
+        <!-- The identifier that must be unique within the hosting gallery -->
+        <id>RueLaLa.HealthChecks</id>
+
+        <!-- The package version number that is used when resolving dependencies -->
+        <version>0.0.1</version>
+
+        <!-- Any details about this particular release -->
+        <releaseNotes>Initial release</releaseNotes>
+
+        <!-- Authors contain text that appears directly on the gallery -->
+        <authors>Rue La La</authors>
+
+        <!-- Owners are typically nuget.org identities that allow gallery
+                users to easily find other packages by the same owners.  -->
+        <owners>Rue La La</owners>
+
+        <!-- License and project URLs provide links for the gallery -->
+        <projectUrl>https://github.com/ruelala/HealthChecks</projectUrl>
+
+        <!-- If true, this value prompts the user to accept the license when
+                installing the package. -->
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+
+        <!-- The description can be used in package manager UI. Note that the
+                nuget.org gallery uses information you add in the portal. -->
+        <description>Healthcheck library for .NET Core services</description>
+
+        <!-- Copyright information -->
+        <copyright>Copyright ©2018 Rue La La</copyright>
+
+        <!-- Tags appear in the gallery and can be used for tag searches -->
+        <tags>healthcheck</tags>
+
+        <!-- Dependencies are automatically installed when the package is installed -->
+        <dependencies>
+            <dependency id="Microsoft.AspNetCore.Hosting" version="1.0.2" />
+            <dependency id="Microsoft.Extensions.Logging" version="1.0.2" />
+            <dependency id="Newtonsoft.Json" version="9.0.1" />
+            <dependency id="System.Diagnostics.Process" version="4.3.0" />
+            <dependency id="System.Threading.Tasks.Extensions" version="4.3.0" />
+            <dependency id="System.Threading.Tasks.Parallel" version="4.3.0" />
+            <dependency id="System.Threading.Thread" version="4.3.0" />
+            <dependency id="System.Data.SqlClient" version="4.3.0" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="RueLaLa.HealthChecks/bin/Release/**" target="lib" />
+    </files>
+
+</package>
