@@ -47,7 +47,9 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="RueLaLa.HealthChecks/bin/Release/**" target="lib" />
+        <file src="src/Microsoft.AspNetCore.HealthChecks/bin/Release/**" target="lib" />
+        <file src="src/Microsoft.Extensions.HealthChecks/bin/Release/**" target="lib" />
+        <file src="src/Microsoft.Extensions.HealthChecks.SqlServer/bin/Release/**" target="lib" />
     </files>
 
 </package>
