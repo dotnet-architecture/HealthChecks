@@ -5,7 +5,7 @@
         <id>RueLaLa.HealthChecks</id>
 
         <!-- The package version number that is used when resolving dependencies -->
-        <version>0.0.1</version>
+        <version>0.0.2</version>
 
         <!-- Any details about this particular release -->
         <releaseNotes>Initial release</releaseNotes>
