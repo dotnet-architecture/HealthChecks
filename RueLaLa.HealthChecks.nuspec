@@ -5,7 +5,7 @@
         <id>RueLaLa.HealthChecks</id>
 
         <!-- The package version number that is used when resolving dependencies -->
-        <version>0.0.2</version>
+        <version>0.0.3</version>
 
         <!-- Any details about this particular release -->
         <releaseNotes>Initial release</releaseNotes>
@@ -26,7 +26,8 @@
 
         <!-- The description can be used in package manager UI. Note that the
                 nuget.org gallery uses information you add in the portal. -->
-        <description>Healthcheck library for .NET Core services</description>
+        <description>Healthcheck library for .NET Core services (forked from
+          https://github.com/dotnet-architecture/HealthChecks)</description>
 
         <!-- Copyright information -->
         <copyright>Copyright ©2018 Rue La La</copyright>
