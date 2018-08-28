@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Extensions.HealthChecks;
 using Newtonsoft.Json;
 
