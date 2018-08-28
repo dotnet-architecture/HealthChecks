@@ -65,5 +65,36 @@ namespace Microsoft.Extensions.HealthChecks
 
             return builder;
         }
+
+        public static HealthCheckBuilder AddRangeValueCheck<T>(this HealthCheckBuilder builder, string name, (T minValue, T maxValue) range, Func<T> currentValueFunc) where T : IComparable<T>
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+
+            return AddRangeValueCheck(builder, name, range, currentValueFunc, builder.DefaultCacheDuration);
+        }
+
+        public static HealthCheckBuilder AddRangeValueCheck<T>(this HealthCheckBuilder builder, string name, (T minValue,T maxValue) range, Func<T> currentValueFunc, TimeSpan cacheDuration)
+            where T : IComparable<T>
+        {
+            Guard.ArgumentNotNull(nameof(builder), builder);
+            Guard.ArgumentNotNullOrEmpty(nameof(name), name);
+            Guard.ArgumentNotNull(nameof(currentValueFunc), currentValueFunc);
+
+            builder.AddCheck(name, () =>
+            {
+                var currentValue = currentValueFunc();
+                var status = currentValue.CompareTo(range.maxValue) <= 0 && currentValue.CompareTo(range.minValue) >= 0 ? CheckStatus.Healthy : CheckStatus.Unhealthy;
+                return HealthCheckResult.FromStatus(
+                    status,
+                    $"min={range.minValue},max={range.maxValue}, current={currentValue}",
+                    new Dictionary<string, object> { { "max", range.maxValue }, { "min", range.minValue }, { "current", currentValue } }
+                );
+            }, cacheDuration);
+
+
+            return builder;
+        }
+
+
     }
 }
