@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.HealthChecks
                     //TODO: There is probably a much better way to do this.
                     using (var connection = new SqlConnection(connectionString))
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
                         using (var command = connection.CreateCommand())
                         {
                             command.CommandType = CommandType.Text;
