@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNet.HealthChec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleHealthChecker.AspNet", "samples\SampleHealthChecker.AspNet\SampleHealthChecker.AspNet.csproj", "{33FB5967-62C7-4230-B515-780EF63F748E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.HealthChecks.Redis", "src\Microsoft.Extensions.HealthChecks.Redis\Microsoft.Extensions.HealthChecks.Redis.csproj", "{B88C2B6F-991F-4217-84A0-28F0BEDBD993}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{33FB5967-62C7-4230-B515-780EF63F748E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33FB5967-62C7-4230-B515-780EF63F748E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33FB5967-62C7-4230-B515-780EF63F748E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B88C2B6F-991F-4217-84A0-28F0BEDBD993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B88C2B6F-991F-4217-84A0-28F0BEDBD993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B88C2B6F-991F-4217-84A0-28F0BEDBD993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B88C2B6F-991F-4217-84A0-28F0BEDBD993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,5 +82,9 @@ Global
 		{13BE838A-200B-4A68-8F58-3EA3BE3A1A8A} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
 		{2AE82E1C-6CE1-4755-A332-FA359B7CCE72} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
 		{33FB5967-62C7-4230-B515-780EF63F748E} = {E05DCF88-F916-4B61-A5DC-A8344C9E2429}
+		{B88C2B6F-991F-4217-84A0-28F0BEDBD993} = {F9BA869A-7D5F-420F-9505-2D881F7934A7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {647884AE-0D3B-4A25-8303-1CEA1C2DD945}
 	EndGlobalSection
 EndGlobal
