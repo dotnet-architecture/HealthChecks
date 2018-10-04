@@ -5,9 +5,9 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public enum CheckStatus
     {
-        Unknown,
-        Unhealthy,
+        Unknown = 0,
         Healthy,
-        Warning
+        Warning,
+        Unhealthy,
     }
 }
