@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.HealthChecks
             return AddSqlCheck(builder, name, connectionString, builder.DefaultCacheDuration);
         }
 
-        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString, TimeSpan cacheDuration)
+        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString, TimeSpan cacheDuration,string query="SELECT 1", Predicate<int> predicate = (result)=>result==1)
         {
             builder.AddCheck($"SqlCheck({name})", async () =>
             {
@@ -31,14 +31,13 @@ namespace Microsoft.Extensions.HealthChecks
                         using (var command = connection.CreateCommand())
                         {
                             command.CommandType = CommandType.Text;
-                            command.CommandText = "SELECT 1";
-                            var result = (int)await command.ExecuteScalarAsync().ConfigureAwait(false);
-                            if (result == 1)
-                            {
-                                return HealthCheckResult.Healthy($"SqlCheck({name}): Healthy");
-                            }
+                            command.CommandText = query;
 
-                            return HealthCheckResult.Unhealthy($"SqlCheck({name}): Unhealthy");
+                            var result = (int)await command.ExecuteScalarAsync().ConfigureAwait(false);
+                              
+                            return predicate(result)
+                            ? HealthCheckResult.Healthy($"SqlCheck({name}): Healthy")
+                            : HealthCheckResult.Unhealthy($"SqlCheck({name}): Unhealthy");
                         }
                     }
                 }
