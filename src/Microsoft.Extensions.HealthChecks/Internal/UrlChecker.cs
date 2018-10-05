@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 {
     public class UrlChecker
     {
+        private readonly HttpClient _client;
         private readonly Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> _checkFunc;
         private readonly string _url;
 
@@ -21,24 +22,24 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
             _checkFunc = checkFunc;
             _url = url;
+            _client = CreateHttpClient();
         }
 
         public CheckStatus PartiallyHealthyStatus { get; set; } = CheckStatus.Warning;
+        
+        protected virtual HttpClient GetHttpClient() => new HttpClient();
 
         public async Task<IHealthCheckResult> CheckAsync()
         {
-            using (var httpClient = CreateHttpClient())
+            try
             {
-                try
-                {
-                    var response = await httpClient.GetAsync(_url).ConfigureAwait(false);
-                    return await _checkFunc(response);
-                }
-                catch (Exception ex)
-                {
-                    var data = new Dictionary<string, object> { { "url", _url } };
-                    return HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}", data);
-                }
+                var response = await _client.GetAsync(_url).ConfigureAwait(false);
+                return await _checkFunc(response);
+            }
+            catch (Exception ex)
+            {
+                var data = new Dictionary<string, object> { { "url", _url } };
+                return HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}", data);
             }
         }
 
@@ -61,8 +62,5 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             };
             return HealthCheckResult.FromStatus(status, $"status code {response.StatusCode} ({(int)response.StatusCode})", data);
         }
-
-        protected virtual HttpClient GetHttpClient()
-            => new HttpClient();
     }
 }
