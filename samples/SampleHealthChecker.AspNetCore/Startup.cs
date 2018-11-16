@@ -49,7 +49,8 @@ namespace SampleHealthChecker
                       )
                       .AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
                       .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
-                      .AddCheck<CustomHealthCheck>("custom");
+                      .AddCheck<CustomHealthCheck>("custom")
+                      .AddMySqlCheck("mysql", "MySql Connection String", TimeSpan.Zero);
 
                 /*
                 // add valid storage account credentials first
